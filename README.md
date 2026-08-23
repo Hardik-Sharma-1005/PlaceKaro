@@ -1,36 +1,114 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PlaceKaro
 
-## Getting Started
+### Placement Intelligence Platform
 
-First, run the development server:
+PlaceKaro is an AI-powered employability intelligence platform designed to help higher-education institutions build evidence-backed student employability profiles and connect students, recruiters, and placement cells through structured data.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+The prototype focuses on transforming fragmented student information into a structured, verifiable employability profile.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Core Concept
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+PlaceKaro connects three stakeholders:
 
-## Learn More
+- **Students** — build and maintain their employability profiles
+- **Companies / Recruiters** — discover candidates, create opportunities, and evaluate applicants
+- **Placement Cells** — access institutional employability intelligence
 
-To learn more about Next.js, take a look at the following resources:
+The platform is built around a simple principle:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+> **Evidence-backed employability profiles are more useful than resumes alone.**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Prototype Features
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Student
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Firebase authentication
+- Student dashboard
+- Profile completion tracking
+- Academic profile management
+- Skills
+- Projects
+- Opportunities
+- Assessment availability
+- Activity / notifications
+- Responsive dashboard and profile UI
+
+### Recruiter
+
+The architecture supports:
+
+- Candidate discovery
+- Natural-language candidate search
+- Job creation
+- JD processing
+- PIS configuration
+- Assessments
+- Candidate shortlisting
+
+### Placement Cell
+
+The architecture supports:
+
+- Institutional employability intelligence
+- Student employability visibility
+- Attention areas
+- Batch and branch insights
+
+---
+
+## Placement Intelligence Score
+
+PlaceKaro uses a role-specific **Placement Intelligence Score (PIS)**.
+
+PIS is:
+
+- Role-specific
+- Evidence-backed
+- Deterministic in the MVP
+- Calculated only after a job exists
+- Separate from assessment scores
+
+Students do not see their PIS.
+
+---
+
+## Technology Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js 16.3.1 |
+| Language | TypeScript |
+| UI | React |
+| Styling | Tailwind CSS v4 |
+| Routing | Next.js App Router |
+| Authentication | Firebase Authentication |
+| Database | Firebase Realtime Database |
+| Backend/Admin | Firebase Admin SDK |
+| AI | Gemini API / Firebase AI approach |
+| Development | VS Code, Turbopack, ESLint |
+| Runtime | Node.js |
+| Package Manager | npm |
+| Deployment Target | Vercel |
+| Repository | GitHub |
+
+---
+
+## Architecture
+
+```text
+Student / Recruiter / Placement Cell
+                 │
+                 ▼
+          Next.js Frontend
+                 │
+        ┌────────┴────────┐
+        ▼                 ▼
+ Firebase Auth      Realtime Database
+                          │
+                          ▼
+                 Firebase Admin SDK
+                    (seed/admin)
