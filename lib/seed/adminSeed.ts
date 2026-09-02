@@ -16,6 +16,7 @@ import {
   demoJobs,
   demoNotifications,
   demoPISComponents,
+  demoPISConfigurations,
   demoPISScores,
   demoProjects,
   demoSkills,
@@ -35,7 +36,7 @@ async function ensureDemoAuthUser(
   displayName: string
 ): Promise<void> {
   try {
-    const existingUser = await adminAuth.getUser(uid);
+    await adminAuth.getUser(uid);
 
     await adminAuth.updateUser(uid, {
       email,
@@ -86,7 +87,9 @@ export async function writeDemoData(): Promise<void> {
   }
 
   for (const profile of demoStudentProfiles) {
-    updates[`studentProfiles/${profile.userId}`] = profile;
+    updates[
+      `studentProfiles/${profile.userId}`
+    ] = profile;
   }
 
   for (const skill of demoSkills) {
@@ -98,15 +101,21 @@ export async function writeDemoData(): Promise<void> {
   }
 
   for (const internship of demoInternships) {
-    updates[`internships/${internship.id}`] = internship;
+    updates[
+      `internships/${internship.id}`
+    ] = internship;
   }
 
   for (const certification of demoCertifications) {
-    updates[`certifications/${certification.id}`] = certification;
+    updates[
+      `certifications/${certification.id}`
+    ] = certification;
   }
 
   for (const achievement of demoAchievements) {
-    updates[`achievements/${achievement.id}`] = achievement;
+    updates[
+      `achievements/${achievement.id}`
+    ] = achievement;
   }
 
   for (const evidence of demoEvidence) {
@@ -118,7 +127,9 @@ export async function writeDemoData(): Promise<void> {
   }
 
   for (const recruiter of demoCompanyRecruiters) {
-    updates[`companyRecruiters/${recruiter.id}`] = recruiter;
+    updates[
+      `companyRecruiters/${recruiter.id}`
+    ] = recruiter;
   }
 
   for (const job of demoJobs) {
@@ -126,39 +137,63 @@ export async function writeDemoData(): Promise<void> {
   }
 
   for (const requirements of demoJobRequirements) {
-    updates[`jobRequirements/${requirements.jobId}`] = requirements;
+    updates[
+      `jobRequirements/${requirements.jobId}`
+    ] = requirements;
+  }
+
+  for (const configuration of demoPISConfigurations) {
+    updates[
+      `pisConfigurations/${configuration.jobId}`
+    ] = configuration;
   }
 
   for (const pisScore of demoPISScores) {
-    updates[`pisScores/${pisScore.id}`] = pisScore;
+    updates[
+      `pisScores/${pisScore.id}`
+    ] = pisScore;
   }
 
   for (const pisComponents of demoPISComponents) {
-    updates[`pisComponents/${pisComponents.pisId}`] = pisComponents;
+    updates[
+      `pisComponents/${pisComponents.pisId}`
+    ] = pisComponents;
   }
 
   for (const assessment of demoAssessments) {
-    updates[`assessments/${assessment.id}`] = assessment;
+    updates[
+      `assessments/${assessment.id}`
+    ] = assessment;
   }
 
   for (const question of demoAssessmentQuestions) {
-    updates[`assessmentQuestions/${question.id}`] = question;
+    updates[
+      `assessmentQuestions/${question.id}`
+    ] = question;
   }
 
   for (const application of demoApplications) {
-    updates[`applications/${application.id}`] = application;
+    updates[
+      `applications/${application.id}`
+    ] = application;
   }
 
   for (const result of demoAssessmentResults) {
-    updates[`assessmentResults/${result.id}`] = result;
+    updates[
+      `assessmentResults/${result.id}`
+    ] = result;
   }
 
   for (const bookmark of demoBookmarks) {
-    updates[`bookmarks/${bookmark.id}`] = bookmark;
+    updates[
+      `bookmarks/${bookmark.id}`
+    ] = bookmark;
   }
 
   for (const notification of demoNotifications) {
-    updates[`notifications/${notification.id}`] = notification;
+    updates[
+      `notifications/${notification.id}`
+    ] = notification;
   }
 
   await adminDatabase.ref().update(updates);

@@ -5,6 +5,9 @@ import {
   set,
   update,
   remove,
+  query,
+  orderByChild,
+  equalTo,
   type DatabaseReference,
 } from "firebase/database";
 
@@ -22,6 +25,36 @@ export async function getData<T>(
   return snapshot.val() as T;
 }
 
+export async function getDataByChild<T>(
+  collectionPath: string,
+  childPath: string,
+  value: string | number | boolean
+): Promise<T[]> {
+  const collectionRef = ref(
+    database,
+    collectionPath
+  );
+
+  const filteredQuery = query(
+    collectionRef,
+    orderByChild(childPath),
+    equalTo(value)
+  );
+
+  const snapshot = await get(filteredQuery);
+
+  if (!snapshot.exists()) {
+    return [];
+  }
+
+  const data = snapshot.val() as Record<
+    string,
+    T
+  >;
+
+  return Object.values(data);
+}
+
 export async function setData<T>(
   path: string,
   data: T
@@ -29,7 +62,9 @@ export async function setData<T>(
   await set(ref(database, path), data);
 }
 
-export async function updateData<T extends Record<string, unknown>>(
+export async function updateData<
+  T extends Record<string, unknown>
+>(
   path: string,
   data: T
 ): Promise<void> {
@@ -46,11 +81,19 @@ export async function createData<T>(
   collectionPath: string,
   data: T
 ): Promise<string> {
-  const collectionRef = ref(database, collectionPath);
-  const newRef: DatabaseReference = push(collectionRef);
+  const collectionRef = ref(
+    database,
+    collectionPath
+  );
+
+  const newRef: DatabaseReference = push(
+    collectionRef
+  );
 
   if (!newRef.key) {
-    throw new Error("Failed to generate database ID.");
+    throw new Error(
+      "Failed to generate database ID."
+    );
   }
 
   await set(newRef, data);

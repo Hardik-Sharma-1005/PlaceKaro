@@ -1,3 +1,4 @@
+
 // types/database.ts
 
 export type UserRole = "student" | "company" | "placement";
@@ -157,6 +158,26 @@ export interface JobRequirements {
     preferredQualifications?: string[];
   };
   confirmedByCompany: boolean;
+}
+
+export interface PISConfiguration {
+  jobId: string;
+  parameters: {
+    academicPerformance?: number;
+    attendance?: number;
+    backlogs?: number;
+    graduationYear?: number;
+    technicalSkills?: number;
+    domainSkills?: number;
+    projects?: number;
+    internships?: number;
+    certifications?: number;
+    achievements?: number;
+    evidenceQuality?: number;
+    preferredQualifications?: number;
+  };
+  confirmed: boolean;
+  updatedAt: number;
 }
 
 export interface PISScore {
