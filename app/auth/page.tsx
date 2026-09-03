@@ -47,6 +47,15 @@ export default function AuthPage() {
     setSuccess("");
   }
 
+  function validatePassword(pass: string): string | null {
+    if (pass.length < 8) return "Password must be at least 8 characters long.";
+    if (!/[A-Z]/.test(pass)) return "Password must contain at least one uppercase letter.";
+    if (!/[a-z]/.test(pass)) return "Password must contain at least one lowercase letter.";
+    if (!/[0-9]/.test(pass)) return "Password must contain at least one number.";
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(pass)) return "Password must contain at least one special character.";
+    return null;
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -56,6 +65,13 @@ export default function AuthPage() {
 
     try {
       if (mode === "signup") {
+        const passwordError = validatePassword(password);
+        if (passwordError) {
+          setError(passwordError);
+          setLoading(false);
+          return;
+        }
+
         await signUp(email, password, role, displayName);
 
         setSuccess("Account created successfully.");
@@ -69,12 +85,20 @@ export default function AuthPage() {
           setSuccess("");
         }, 1200);
       } else {
-        await signIn(email, password);
+        const cred = await signIn(email, password);
+        const { getUserRecord } = await import("../../lib/services/authService");
+        const userRecord = await getUserRecord(cred.user.uid);
 
         setSuccess("Signed in successfully.");
 
         setTimeout(() => {
-          router.push("/");
+          if (userRecord?.role === "company") {
+            router.push("/recruiter/jobs");
+          } else if (userRecord?.role === "placement") {
+            router.push("/placement");
+          } else {
+            router.push("/");
+          }
         }, 700);
       }
     } catch (err) {

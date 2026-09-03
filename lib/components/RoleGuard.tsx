@@ -1,6 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import type { UserRole } from "../../types/database";
 import { useAuth } from "../context/AuthContext";
 
@@ -23,6 +24,13 @@ export function RoleGuard({
   ),
 }: RoleGuardProps) {
   const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/auth");
+    }
+  }, [user, loading, router]);
 
   if (loading) {
     return (
@@ -33,7 +41,8 @@ export function RoleGuard({
   }
 
   if (!user) {
-    return fallback;
+    // Return null while redirecting
+    return null;
   }
 
   if (!allowedRoles.includes(user.role)) {

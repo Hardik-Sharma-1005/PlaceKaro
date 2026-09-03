@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../lib/context/AuthContext";
 import { RoleGuard } from "../lib/components/RoleGuard";
+import { StudentSidebar, StudentMobileNav } from "../lib/components/StudentNavigation";
 import {
   get,
   orderByChild,
@@ -261,68 +262,7 @@ function DashboardContent() {
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <div className="flex min-h-screen">
         {/* Desktop sidebar */}
-        <aside className="hidden w-64 flex-col border-r border-slate-200 bg-white lg:flex">
-          <div className="flex h-20 items-center border-b border-slate-200 px-6">
-            <div>
-              <div className="text-xl font-bold tracking-tight text-slate-950">
-                PlaceKaro
-              </div>
-
-              <div className="text-xs text-slate-500">
-                Placement Intelligence
-              </div>
-            </div>
-          </div>
-
-          <nav className="flex-1 px-4 py-6">
-            <div className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Workspace
-            </div>
-
-            <div className="space-y-1">
-              <button className="flex w-full items-center gap-3 rounded-xl bg-slate-900 px-3 py-3 text-left text-sm font-medium text-white">
-                <span className="h-2 w-2 rounded-full bg-white" />
-                Dashboard
-              </button>
-
-              <button className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-slate-100">
-                <span className="h-2 w-2 rounded-full bg-slate-300" />
-                My Profile
-              </button>
-
-              <button className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-slate-100">
-                <span className="h-2 w-2 rounded-full bg-slate-300" />
-                Opportunities
-              </button>
-
-              <button className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-slate-100">
-                <span className="h-2 w-2 rounded-full bg-slate-300" />
-                Assessments
-              </button>
-
-              <button className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-slate-100">
-                <span className="h-2 w-2 rounded-full bg-slate-300" />
-                Activity
-              </button>
-            </div>
-          </nav>
-
-          <div className="border-t border-slate-200 p-4">
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                Profile
-              </p>
-
-              <p className="mt-2 text-sm font-semibold text-slate-900">
-                Keep your evidence updated
-              </p>
-
-              <p className="mt-1 text-xs leading-5 text-slate-500">
-                A stronger verified profile helps you become more discoverable.
-              </p>
-            </div>
-          </div>
-        </aside>
+        <StudentSidebar />
 
         {/* Main content */}
         <main className="min-w-0 flex-1">
@@ -355,27 +295,7 @@ function DashboardContent() {
             </div>
 
             {/* Mobile navigation */}
-            <nav className="flex gap-2 overflow-x-auto pb-4 lg:hidden">
-              <button className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-xs font-medium text-white">
-                Dashboard
-              </button>
-
-              <button className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600">
-                My Profile
-              </button>
-
-              <button className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600">
-                Opportunities
-              </button>
-
-              <button className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600">
-                Assessments
-              </button>
-
-              <button className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600">
-                Activity
-              </button>
-            </nav>
+            <StudentMobileNav />
           </header>
 
           <div className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8">

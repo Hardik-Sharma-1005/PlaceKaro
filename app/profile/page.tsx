@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../lib/context/AuthContext";
 import { RoleGuard } from "../../lib/components/RoleGuard";
+import { StudentSidebar, StudentMobileNav } from "../../lib/components/StudentNavigation";
 import { getData, updateData } from "../../lib/realtime/database";
 import {
   equalTo,
@@ -301,37 +302,40 @@ function ProfileContent() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex min-h-20 w-full max-w-6xl items-center justify-between px-5 sm:px-8">
-          <div>
-            <p className="text-xl font-bold tracking-tight text-slate-950">
-              PlaceKaro
-            </p>
+      <div className="flex min-h-screen">
+        <StudentSidebar />
 
-            <p className="text-xs text-slate-500">
-              Placement Intelligence
-            </p>
-          </div>
+        <div className="min-w-0 flex-1">
+          <header className="border-b border-slate-200 bg-white px-5 sm:px-8">
+            <div className="flex h-20 items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-500">Student workspace</p>
+                <h1 className="text-lg font-semibold text-slate-950">
+                  Profile Management
+                </h1>
+              </div>
 
-          <div className="flex items-center gap-3">
-            <div className="hidden text-right sm:block">
-              <p className="text-sm font-semibold text-slate-900">
-                {user?.displayName ?? profile.fullName}
-              </p>
+              <div className="flex items-center gap-3">
+                <div className="hidden text-right sm:block">
+                  <p className="text-sm font-semibold text-slate-900">
+                    {user?.displayName ?? profile.fullName}
+                  </p>
 
-              <p className="text-xs text-slate-500">
-                {user?.email ?? "Student account"}
-              </p>
+                  <p className="text-xs text-slate-500">
+                    {user?.email ?? "Student account"}
+                  </p>
+                </div>
+
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">
+                  {(profile.fullName.charAt(0) || "S").toUpperCase()}
+                </div>
+              </div>
             </div>
 
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">
-              {(profile.fullName.charAt(0) || "S").toUpperCase()}
-            </div>
-          </div>
-        </div>
-      </header>
+            <StudentMobileNav />
+          </header>
 
-      <main className="mx-auto w-full max-w-6xl px-5 py-8 sm:px-8">
+          <main className="mx-auto w-full max-w-6xl px-5 py-8 sm:px-8">
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-sm font-medium text-slate-500">
@@ -768,6 +772,8 @@ function ProfileContent() {
           </div>
         </section>
       </main>
+        </div>
+      </div>
     </div>
   );
 }
