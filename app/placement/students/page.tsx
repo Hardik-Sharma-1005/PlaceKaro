@@ -408,17 +408,17 @@ export default function PlacementStudentDirectory() {
                       <tr key={student.userId} className="hover:bg-slate-50/50 transition">
                         {/* Student Name */}
                         <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-sm font-bold text-indigo-700">
+                          <Link href={`/placement/students/${student.userId}`} className="flex items-center gap-3 group">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-sm font-bold text-indigo-700 group-hover:bg-indigo-100 transition">
                               {student.fullName.charAt(0).toUpperCase()}
                             </div>
                             <div>
-                              <p className="font-bold text-slate-900">{student.fullName}</p>
+                              <p className="font-bold text-slate-900 group-hover:text-indigo-700 transition">{student.fullName}</p>
                               <p className="text-[11px] text-slate-500 font-medium">
                                 Class of {student.graduationYear}
                               </p>
                             </div>
-                          </div>
+                          </Link>
                         </td>
 
                         {/* Academics */}

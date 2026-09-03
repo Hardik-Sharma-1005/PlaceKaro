@@ -2,25 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuth } from "../context/AuthContext";
-import { signOutUser } from "../services/authService";
+
+const NAV_ITEMS = [
+  { name: "Dashboard", href: "/placement", icon: "📊", exact: true },
+  { name: "Student Directory", href: "/placement/students", icon: "🎓", exact: false },
+  { name: "Campus Drives", href: "/placement/jobs", icon: "🏢", exact: false },
+  { name: "Reports", href: "/placement/reports", icon: "📈", exact: false },
+];
 
 export function PlacementSidebar() {
   const pathname = usePathname();
-  const { user } = useAuth();
-
-  const navItems = [
-    { name: "Dashboard", href: "/placement" },
-    { name: "Student Directory", href: "/placement/students" },
-  ];
-
-  async function handleLogout() {
-    try {
-      await signOutUser();
-    } catch (err) {
-      console.error("Logout failed:", err);
-    }
-  }
 
   return (
     <aside className="hidden w-64 flex-col border-r border-indigo-100 bg-indigo-950 lg:flex">
@@ -39,11 +30,11 @@ export function PlacementSidebar() {
         </div>
 
         <div className="space-y-1">
-          {navItems.map((item) => {
-            const isActive = item.href === "/placement" 
-              ? pathname === "/placement"
+          {NAV_ITEMS.map((item) => {
+            const isActive = item.exact
+              ? pathname === item.href
               : pathname.startsWith(item.href);
-              
+
             return (
               <Link
                 key={item.href}
@@ -54,11 +45,7 @@ export function PlacementSidebar() {
                     : "text-indigo-200 hover:bg-indigo-900"
                 }`}
               >
-                <span
-                  className={`h-2 w-2 rounded-full ${
-                    isActive ? "bg-indigo-900" : "bg-indigo-500"
-                  }`}
-                />
+                <span className="text-base leading-none w-5 text-center">{item.icon}</span>
                 {item.name}
               </Link>
             );
@@ -75,15 +62,6 @@ export function PlacementSidebar() {
             Monitor batch readiness and student employability visibility.
           </p>
         </div>
-
-        {user && (
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 rounded-xl border border-indigo-800 py-2.5 text-xs font-semibold text-indigo-300 hover:bg-indigo-900 hover:text-white transition"
-          >
-            Sign Out
-          </button>
-        )}
       </div>
     </aside>
   );
@@ -92,28 +70,24 @@ export function PlacementSidebar() {
 export function PlacementMobileNav() {
   const pathname = usePathname();
 
-  const navItems = [
-    { name: "Dashboard", href: "/placement" },
-    { name: "Student Directory", href: "/placement/students" },
-  ];
-
   return (
     <nav className="flex gap-2 overflow-x-auto pb-4 lg:hidden">
-      {navItems.map((item) => {
-        const isActive = item.href === "/placement" 
-          ? pathname === "/placement"
+      {NAV_ITEMS.map((item) => {
+        const isActive = item.exact
+          ? pathname === item.href
           : pathname.startsWith(item.href);
-          
+
         return (
           <Link
             key={item.href}
             href={item.href}
-            className={`shrink-0 rounded-lg px-3 py-2 text-xs font-medium transition ${
+            className={`shrink-0 flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition ${
               isActive
                 ? "bg-indigo-950 text-white"
                 : "border border-indigo-100 bg-white text-indigo-900 hover:bg-indigo-50"
             }`}
           >
+            <span>{item.icon}</span>
             {item.name}
           </Link>
         );

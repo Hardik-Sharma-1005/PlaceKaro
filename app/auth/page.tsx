@@ -85,20 +85,12 @@ export default function AuthPage() {
           setSuccess("");
         }, 1200);
       } else {
-        const cred = await signIn(email, password);
-        const { getUserRecord } = await import("../../lib/services/authService");
-        const userRecord = await getUserRecord(cred.user.uid);
+        await signIn(email, password);
 
         setSuccess("Signed in successfully.");
 
         setTimeout(() => {
-          if (userRecord?.role === "company") {
-            router.push("/recruiter/jobs");
-          } else if (userRecord?.role === "placement") {
-            router.push("/placement");
-          } else {
-            router.push("/");
-          }
+          router.push("/placement");
         }, 700);
       }
     } catch (err) {
