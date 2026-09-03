@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   calculatePIS,
 } from "../../../lib/pis/engine";
@@ -101,8 +101,45 @@ type CandidateView = {
   error: string | null;
 };
 
+type RecruiterPISResponse = {
+  inputs?: PISInput[];
+  error?: string;
+};
+
 function formatScore(score: number): string {
   return score.toFixed(2);
+}
+
+function createDefaultWeights(): Record<
+  PISParameter,
+  number
+> {
+  const initial =
+    {} as Record<PISParameter, number>;
+
+  for (const option of PARAMETER_OPTIONS) {
+    initial[option.key] =
+      option.defaultWeight;
+  }
+
+  return initial;
+}
+
+function createWeightsFromConfiguration(
+  parameters: Partial<
+    Record<PISParameter, number>
+  >
+): Record<PISParameter, number> {
+  const weights = createDefaultWeights();
+
+  for (const option of PARAMETER_OPTIONS) {
+    weights[option.key] =
+      typeof parameters[option.key] === "number"
+        ? parameters[option.key]!
+        : 0;
+  }
+
+  return weights;
 }
 
 function buildConfiguration(
@@ -131,15 +168,7 @@ function buildConfiguration(
 export default function RecruiterPISPage() {
   const [weights, setWeights] = useState<
     Record<PISParameter, number>
-  >(() => {
-    const initial = {} as Record<PISParameter, number>;
-
-    for (const option of PARAMETER_OPTIONS) {
-      initial[option.key] = option.defaultWeight;
-    }
-
-    return initial;
-  });
+  >(createDefaultWeights);
 
   const [candidateInputs, setCandidateInputs] =
     useState<PISInput[] | null>(null);
@@ -152,6 +181,18 @@ export default function RecruiterPISPage() {
         error: null,
       }))
     );
+
+  const [isLoading, setIsLoading] =
+    useState(true);
+
+  const [isSaving, setIsSaving] =
+    useState(false);
+
+  const [saveMessage, setSaveMessage] =
+    useState("");
+
+  const [loadError, setLoadError] =
+    useState("");
 
   const totalWeight = useMemo(
     () =>
@@ -174,11 +215,98 @@ export default function RecruiterPISPage() {
     Math.abs(totalWeight - 100) < 0.0001 &&
     selectedParameterCount > 0;
 
+  async function loadCandidateInputs(): Promise<
+    PISInput[]
+  > {
+    const response = await fetch(
+      `/api/recruiter/pis?jobId=${encodeURIComponent(
+        JOB_ID
+      )}`,
+      {
+        cache: "no-store",
+      }
+    );
+
+    const data =
+      (await response.json()) as RecruiterPISResponse;
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ??
+          "Unable to load recruiter PIS data."
+      );
+    }
+
+    if (
+      !data.inputs ||
+      data.inputs.length === 0
+    ) {
+      throw new Error(
+        "No recruiter PIS candidate data was returned."
+      );
+    }
+
+    return data.inputs;
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadInitialData(): Promise<void> {
+      try {
+        setIsLoading(true);
+        setLoadError("");
+
+        const inputs =
+          await loadCandidateInputs();
+
+        if (cancelled) {
+          return;
+        }
+
+        const savedConfiguration =
+          inputs[0]?.configuration;
+
+        if (savedConfiguration) {
+          setWeights(
+            createWeightsFromConfiguration(
+              savedConfiguration.parameters
+            )
+          );
+        }
+
+        setCandidateInputs(inputs);
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+
+        setLoadError(
+          error instanceof Error
+            ? error.message
+            : "Unable to load recruiter PIS data."
+        );
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    void loadInitialData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   function updateWeight(
     parameter: PISParameter,
     value: string
   ): void {
     const parsed = Number(value);
+
+    setSaveMessage("");
 
     setWeights((current) => ({
       ...current,
@@ -189,30 +317,77 @@ export default function RecruiterPISPage() {
     }));
   }
 
-  async function loadCandidateInputs(): Promise<
-    PISInput[]
-  > {
-    const response = await fetch(
-      `/api/recruiter/pis?jobId=${encodeURIComponent(
-        JOB_ID
-      )}`
-    );
-
-    if (!response.ok) {
-      throw new Error(
-        "Unable to load recruiter PIS data."
+  async function saveConfiguration(): Promise<boolean> {
+    if (!isValidConfiguration) {
+      setSaveMessage(
+        "Weights must total exactly 100%."
       );
+      return false;
     }
 
-    const data = (await response.json()) as {
-      inputs: PISInput[];
-    };
+    try {
+      setIsSaving(true);
+      setSaveMessage("");
 
-    return data.inputs;
+      const configuration =
+        buildConfiguration(weights);
+
+      const response = await fetch(
+        "/api/recruiter/pis",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            jobId: JOB_ID,
+            parameters:
+              configuration.parameters,
+          }),
+        }
+      );
+
+      const data =
+        (await response.json()) as {
+          success?: boolean;
+          error?: string;
+        };
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ??
+            "Unable to save PIS configuration."
+        );
+      }
+
+      setSaveMessage(
+        "Configuration saved successfully."
+      );
+
+      return true;
+    } catch (error) {
+      setSaveMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to save PIS configuration."
+      );
+
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
   }
 
-  async function handleCalculate(): Promise<void> {
+  async function handleSaveAndCalculate(): Promise<void> {
     if (!isValidConfiguration) {
+      return;
+    }
+
+    const saved =
+      await saveConfiguration();
+
+    if (!saved) {
       return;
     }
 
@@ -248,13 +423,15 @@ export default function RecruiterPISPage() {
             };
           } catch (error) {
             return {
-              id: input.candidate.profile.userId,
+              id:
+                input.candidate.profile.userId,
               name:
                 DEMO_CANDIDATES.find(
                   (item) =>
                     item.id ===
                     input.candidate.profile.userId
-                )?.name ?? input.candidate.profile.fullName,
+                )?.name ??
+                input.candidate.profile.fullName,
               result: null,
               error:
                 error instanceof Error
@@ -293,11 +470,18 @@ export default function RecruiterPISPage() {
           </h1>
 
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-            Configure the parameters that matter for this
-            role, assign their weights, and calculate
+            Configure the parameters that matter
+            for this role, assign their weights,
+            save the configuration, and calculate
             deterministic candidate PIS scores.
           </p>
         </div>
+
+        {loadError && (
+          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {loadError}
+          </div>
+        )}
 
         <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
@@ -346,8 +530,8 @@ export default function RecruiterPISPage() {
                 </h3>
 
                 <p className="mt-1 text-xs text-slate-500">
-                  Set a weight greater than 0% to select a
-                  parameter.
+                  Set a weight greater than 0% to
+                  select a parameter.
                 </p>
               </div>
 
@@ -364,96 +548,127 @@ export default function RecruiterPISPage() {
               </p>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              {PARAMETER_OPTIONS.map((option) => {
-                const weight = weights[option.key];
+            {isLoading ? (
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
+                Loading saved PIS configuration...
+              </div>
+            ) : (
+              <>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {PARAMETER_OPTIONS.map(
+                    (option) => {
+                      const weight =
+                        weights[option.key];
 
-                return (
-                  <div
-                    key={option.key}
-                    className={`rounded-xl border p-4 transition ${
-                      weight > 0
-                        ? "border-blue-200 bg-blue-50/50"
-                        : "border-slate-200 bg-white"
+                      return (
+                        <div
+                          key={option.key}
+                          className={`rounded-xl border p-4 transition ${
+                            weight > 0
+                              ? "border-blue-200 bg-blue-50/50"
+                              : "border-slate-200 bg-white"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-4">
+                            <div>
+                              <p className="text-sm font-semibold text-slate-900">
+                                {option.label}
+                              </p>
+
+                              {weight > 0 && (
+                                <p className="mt-1 text-xs text-blue-600">
+                                  Selected
+                                </p>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="number"
+                                min="0"
+                                max="100"
+                                step="1"
+                                value={weight}
+                                onChange={(event) =>
+                                  updateWeight(
+                                    option.key,
+                                    event.target.value
+                                  )
+                                }
+                                className="w-24 rounded-lg border border-slate-300 bg-white px-3 py-2 text-right text-sm font-semibold text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                              />
+
+                              <span className="text-sm text-slate-500">
+                                %
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
+                            <div
+                              className="h-full rounded-full bg-blue-500 transition-all"
+                              style={{
+                                width: `${Math.min(
+                                  Math.max(
+                                    weight,
+                                    0
+                                  ),
+                                  100
+                                )}%`,
+                              }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    }
+                  )}
+                </div>
+
+                <div className="mt-6 flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">
+                      Selected parameters:{" "}
+                      {selectedParameterCount}
+                    </p>
+
+                    <p className="mt-1 text-xs text-slate-500">
+                      Weights are saved to the
+                      recruiter PIS configuration
+                      for this job.
+                    </p>
+
+                    {saveMessage && (
+                      <p className="mt-2 text-sm font-medium text-slate-700">
+                        {saveMessage}
+                      </p>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={
+                      handleSaveAndCalculate
+                    }
+                    disabled={
+                      !isValidConfiguration ||
+                      isSaving ||
+                      isLoading
+                    }
+                    className={`rounded-xl px-5 py-3 text-sm font-semibold transition ${
+                      isValidConfiguration &&
+                      !isSaving &&
+                      !isLoading
+                        ? "bg-blue-600 text-white hover:bg-blue-700"
+                        : "cursor-not-allowed bg-slate-200 text-slate-400"
                     }`}
                   >
-                    <div className="flex items-center justify-between gap-4">
-                      <div>
-                        <p className="text-sm font-semibold text-slate-900">
-                          {option.label}
-                        </p>
-
-                        {weight > 0 && (
-                          <p className="mt-1 text-xs text-blue-600">
-                            Selected
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          step="1"
-                          value={weight}
-                          onChange={(event) =>
-                            updateWeight(
-                              option.key,
-                              event.target.value
-                            )
-                          }
-                          className="w-24 rounded-lg border border-slate-300 bg-white px-3 py-2 text-right text-sm font-semibold text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                        />
-
-                        <span className="text-sm text-slate-500">
-                          %
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
-                      <div
-                        className="h-full rounded-full bg-blue-500 transition-all"
-                        style={{
-                          width: `${Math.min(
-                            Math.max(weight, 0),
-                            100
-                          )}%`,
-                        }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="mt-6 flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-sm font-semibold text-slate-900">
-                  Selected parameters:{" "}
-                  {selectedParameterCount}
-                </p>
-
-                <p className="mt-1 text-xs text-slate-500">
-                  Recruiter weights are used by the existing
-                  deterministic PIS engine.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleCalculate}
-                disabled={!isValidConfiguration}
-                className={`rounded-xl px-5 py-3 text-sm font-semibold transition ${
-                  isValidConfiguration
-                    ? "bg-blue-600 text-white hover:bg-blue-700"
-                    : "cursor-not-allowed bg-slate-200 text-slate-400"
-                }`}
-              >
-                Calculate PIS
-              </button>
-            </div>
+                    {isSaving
+                      ? "Saving..."
+                      : "Save & Calculate PIS"}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </section>
 
@@ -464,8 +679,8 @@ export default function RecruiterPISPage() {
             </h2>
 
             <p className="mt-1 text-sm text-slate-500">
-              Results are calculated using the selected
-              configuration.
+              Results are calculated using the
+              saved recruiter configuration.
             </p>
           </div>
 
@@ -505,7 +720,7 @@ export default function RecruiterPISPage() {
                   ) : (
                     <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">
                       {candidate.error ??
-                        "Configure the weights and calculate PIS."}
+                        "Save a valid configuration and calculate PIS."}
                     </div>
                   )}
                 </div>
@@ -599,8 +814,8 @@ export default function RecruiterPISPage() {
                       </span>
 
                       {candidate.result
-                        .missingParameters.length >
-                        0 && (
+                        .missingParameters
+                        .length > 0 && (
                         <span>
                           Missing:{" "}
                           {candidate.result.missingParameters.join(
