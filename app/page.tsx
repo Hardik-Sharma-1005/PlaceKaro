@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useAuth } from "../lib/context/AuthContext";
 import { RoleGuard } from "../lib/components/RoleGuard";
 import {
@@ -285,10 +286,13 @@ function DashboardContent() {
                 Dashboard
               </button>
 
-              <button className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-slate-100">
+              <Link
+                href="/profile"
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+              >
                 <span className="h-2 w-2 rounded-full bg-slate-300" />
                 My Profile
-              </button>
+              </Link>
 
               <button className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-slate-100">
                 <span className="h-2 w-2 rounded-full bg-slate-300" />
@@ -320,6 +324,14 @@ function DashboardContent() {
               <p className="mt-1 text-xs leading-5 text-slate-500">
                 A stronger verified profile helps you become more discoverable.
               </p>
+
+              <Link
+                href="/profile"
+                className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-slate-900 hover:underline"
+              >
+                <span>Edit Portfolio & Evidence</span>
+                <span>→</span>
+              </Link>
             </div>
           </div>
         </aside>
@@ -360,9 +372,12 @@ function DashboardContent() {
                 Dashboard
               </button>
 
-              <button className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600">
+              <Link
+                href="/profile"
+                className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
+              >
                 My Profile
-              </button>
+              </Link>
 
               <button className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600">
                 Opportunities
@@ -398,10 +413,18 @@ function DashboardContent() {
             {/* Overview cards */}
             <section className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               {/* Profile completion */}
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <p className="text-sm font-medium text-slate-500">
-                  Profile completion
-                </p>
+              <Link
+                href="/profile"
+                className="group block rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow-xs"
+              >
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-slate-500">
+                    Profile completion
+                  </p>
+                  <span className="text-xs text-slate-400 transition group-hover:text-slate-900">
+                    Manage →
+                  </span>
+                </div>
 
                 <div className="mt-4 flex items-end justify-between">
                   <p className="text-3xl font-bold text-slate-950">
@@ -429,7 +452,7 @@ function DashboardContent() {
                     }}
                   />
                 </div>
-              </div>
+              </Link>
 
               {/* Skills listed */}
               <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
