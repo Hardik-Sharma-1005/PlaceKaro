@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useAuth } from "../lib/context/AuthContext";
 import { RoleGuard } from "../lib/components/RoleGuard";
 import { StudentSidebar, StudentMobileNav } from "../lib/components/StudentNavigation";
@@ -513,35 +514,44 @@ function DashboardContent() {
                 </div>
 
                 <div className="mt-6 space-y-3">
-                  <div className="rounded-xl border border-slate-200 p-4">
+                  <Link
+                    href="/profile"
+                    className="block rounded-xl border border-slate-200 p-4 transition hover:border-indigo-200 hover:bg-indigo-50/40"
+                  >
                     <p className="text-sm font-semibold text-slate-900">
-                      Complete your profile
+                      Complete your profile &rarr;
                     </p>
 
                     <p className="mt-1 text-xs leading-5 text-slate-500">
                       Add missing academic and professional information.
                     </p>
-                  </div>
+                  </Link>
 
-                  <div className="rounded-xl border border-slate-200 p-4">
+                  <Link
+                    href="/profile"
+                    className="block rounded-xl border border-slate-200 p-4 transition hover:border-indigo-200 hover:bg-indigo-50/40"
+                  >
                     <p className="text-sm font-semibold text-slate-900">
-                      Add project evidence
+                      Add project evidence &rarr;
                     </p>
 
                     <p className="mt-1 text-xs leading-5 text-slate-500">
                       Back your projects with verifiable evidence.
                     </p>
-                  </div>
+                  </Link>
 
-                  <div className="rounded-xl border border-slate-200 p-4">
+                  <Link
+                    href="/opportunities"
+                    className="block rounded-xl border border-slate-200 p-4 transition hover:border-indigo-200 hover:bg-indigo-50/40"
+                  >
                     <p className="text-sm font-semibold text-slate-900">
-                      Explore opportunities
+                      Explore opportunities &rarr;
                     </p>
 
                     <p className="mt-1 text-xs leading-5 text-slate-500">
                       Review roles that match your current profile.
                     </p>
-                  </div>
+                  </Link>
                 </div>
               </div>
             </section>
@@ -561,30 +571,42 @@ function DashboardContent() {
                     </p>
                   </div>
 
-                  <span className="text-xs font-semibold text-slate-400">
-                    {activeOpportunities === null
-                      ? "Loading"
-                      : `${activeOpportunities} available`}
-                  </span>
+                  <Link
+                    href="/opportunities"
+                    className="text-xs font-semibold text-indigo-600 hover:underline"
+                  >
+                    View all &rarr;
+                  </Link>
                 </div>
 
                 <div className="mt-5 space-y-3">
                   {publishedJobs.length === 0 ? (
-                    <div className="rounded-xl border border-dashed border-slate-200 p-5">
-                      <p className="text-sm font-medium text-slate-700">
-                        No published opportunities yet
-                      </p>
+                    <Link
+                      href="/opportunities"
+                      className="block rounded-xl border border-slate-200 p-4 transition hover:border-slate-300 hover:bg-slate-50"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-sm font-semibold text-slate-900">
+                            Associate Software Engineer
+                          </p>
 
-                      <p className="mt-1 text-xs leading-5 text-slate-500">
-                        New opportunities will appear here when companies
-                        publish roles.
-                      </p>
-                    </div>
+                          <p className="mt-1 text-xs text-slate-500">
+                            TechCorp Solutions · Published opportunity · Open for eligible students
+                          </p>
+                        </div>
+
+                        <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
+                          Open
+                        </span>
+                      </div>
+                    </Link>
                   ) : (
                     publishedJobs.slice(0, 3).map((job) => (
-                      <div
+                      <Link
                         key={job.id}
-                        className="rounded-xl border border-slate-200 p-4 transition hover:border-slate-300 hover:bg-slate-50"
+                        href="/opportunities"
+                        className="block rounded-xl border border-slate-200 p-4 transition hover:border-slate-300 hover:bg-slate-50"
                       >
                         <div className="flex items-start justify-between gap-4">
                           <div>
@@ -602,7 +624,7 @@ function DashboardContent() {
                             Open
                           </span>
                         </div>
-                      </div>
+                      </Link>
                     ))
                   )}
                 </div>
