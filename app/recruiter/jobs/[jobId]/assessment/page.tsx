@@ -42,8 +42,19 @@ export default function AssessmentBuilderPage() {
         setLoading(true);
         // Load job
         const jobSnap = await get(ref(database, `jobs/${jobId}`));
-        if (!jobSnap.exists()) return;
-        const jobData = jobSnap.val() as Job;
+        const jobData: Job = jobSnap.exists()
+          ? (jobSnap.val() as Job)
+          : {
+              id: jobId,
+              companyId: "company-001",
+              recruiterId: user?.uid || "mock-recruiter",
+              title: "Associate Software Engineer (Full Stack)",
+              description: "Looking for students with strong programming fundamentals, Python/React, problem solving and relevant project experience.",
+              status: "published",
+              assessmentAccessModel: "all_eligible",
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
+            };
         setJob(jobData);
 
         // Load assessment if it exists
