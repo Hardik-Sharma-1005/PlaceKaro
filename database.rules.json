@@ -1,0 +1,52 @@
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+
+    "studentProfiles": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+
+    "skills": {
+      ".read": "auth != null && query.orderByChild === 'studentId' && query.equalTo === auth.uid",
+      ".indexOn": [
+        "studentId"
+      ]
+    },
+
+    "projects": {
+      ".read": "auth != null && query.orderByChild === 'studentId' && query.equalTo === auth.uid",
+      ".indexOn": [
+        "studentId"
+      ]
+    },
+
+    "jobs": {
+      ".read": "auth != null && query.orderByChild === 'status' && query.equalTo === 'published'",
+      ".indexOn": [
+        "status"
+      ]
+    },
+
+    "applications": {
+      ".read": "auth != null && query.orderByChild === 'studentId' && query.equalTo === auth.uid",
+      ".indexOn": [
+        "studentId"
+      ]
+    },
+
+    "notifications": {
+      ".read": "auth != null && query.orderByChild === 'userId' && query.equalTo === auth.uid",
+      ".indexOn": [
+        "userId"
+      ]
+    }
+  }
+}
