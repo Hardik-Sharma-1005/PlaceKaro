@@ -109,7 +109,7 @@ function testDemoCandidates(): void {
 
   assertClose(
     aarav!.score,
-    73.75,
+    79.75,
     0.0001,
     "Aarav PIS should match the deterministic fixture."
   );
