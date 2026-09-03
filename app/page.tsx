@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useAuth } from "../lib/context/AuthContext";
 import { RoleGuard } from "../lib/components/RoleGuard";
 import {
@@ -260,7 +261,6 @@ function DashboardContent() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <div className="flex min-h-screen">
-        {/* Desktop sidebar */}
         <aside className="hidden w-64 flex-col border-r border-slate-200 bg-white lg:flex">
           <div className="flex h-20 items-center border-b border-slate-200 px-6">
             <div>
@@ -285,10 +285,13 @@ function DashboardContent() {
                 Dashboard
               </button>
 
-              <button className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-slate-100">
+              <Link
+                href="/profile"
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-slate-100"
+              >
                 <span className="h-2 w-2 rounded-full bg-slate-300" />
                 My Profile
-              </button>
+              </Link>
 
               <button className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-slate-100">
                 <span className="h-2 w-2 rounded-full bg-slate-300" />
@@ -324,9 +327,7 @@ function DashboardContent() {
           </div>
         </aside>
 
-        {/* Main content */}
         <main className="min-w-0 flex-1">
-          {/* Top bar */}
           <header className="border-b border-slate-200 bg-white px-5 sm:px-8">
             <div className="flex h-20 items-center justify-between">
               <div>
@@ -354,15 +355,17 @@ function DashboardContent() {
               </div>
             </div>
 
-            {/* Mobile navigation */}
             <nav className="flex gap-2 overflow-x-auto pb-4 lg:hidden">
               <button className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-xs font-medium text-white">
                 Dashboard
               </button>
 
-              <button className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600">
+              <Link
+                href="/profile"
+                className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600"
+              >
                 My Profile
-              </button>
+              </Link>
 
               <button className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600">
                 Opportunities
@@ -379,7 +382,6 @@ function DashboardContent() {
           </header>
 
           <div className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8">
-            {/* Welcome */}
             <section>
               <p className="text-sm font-medium text-slate-500">
                 Welcome back
@@ -395,9 +397,7 @@ function DashboardContent() {
               </p>
             </section>
 
-            {/* Overview cards */}
             <section className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {/* Profile completion */}
               <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <p className="text-sm font-medium text-slate-500">
                   Profile completion
@@ -431,7 +431,6 @@ function DashboardContent() {
                 </div>
               </div>
 
-              {/* Skills listed */}
               <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <p className="text-sm font-medium text-slate-500">
                   Skills listed
@@ -446,7 +445,6 @@ function DashboardContent() {
                 </p>
               </div>
 
-              {/* Active opportunities */}
               <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <p className="text-sm font-medium text-slate-500">
                   Active opportunities
@@ -463,7 +461,6 @@ function DashboardContent() {
                 </p>
               </div>
 
-              {/* Assessments */}
               <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <p className="text-sm font-medium text-slate-500">
                   Assessments
@@ -481,9 +478,7 @@ function DashboardContent() {
               </div>
             </section>
 
-            {/* Main dashboard grid */}
             <section className="mt-6 grid gap-6 xl:grid-cols-[1.4fr_1fr]">
-              {/* Readiness */}
               <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -580,7 +575,6 @@ function DashboardContent() {
                 </div>
               </div>
 
-              {/* Next actions */}
               <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div>
                   <p className="text-sm font-semibold text-slate-950">
@@ -626,9 +620,7 @@ function DashboardContent() {
               </div>
             </section>
 
-            {/* Opportunities + activity */}
             <section className="mt-6 grid gap-6 xl:grid-cols-2">
-              {/* Opportunities */}
               <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="flex items-center justify-between">
                   <div>
@@ -688,7 +680,6 @@ function DashboardContent() {
                 </div>
               </div>
 
-              {/* Recent activity */}
               <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="flex items-center justify-between">
                   <div>
