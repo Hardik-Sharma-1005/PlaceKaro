@@ -18,14 +18,66 @@
       ".read": "auth != null && query.orderByChild === 'studentId' && query.equalTo === auth.uid",
       ".indexOn": [
         "studentId"
-      ]
+      ],
+      "$id": {
+        ".read": "auth != null && data.child('studentId').val() === auth.uid",
+        ".write": "auth != null && (!data.exists() || data.child('studentId').val() === auth.uid) && (!newData.exists() || newData.child('studentId').val() === auth.uid)"
+      }
     },
 
     "projects": {
       ".read": "auth != null && query.orderByChild === 'studentId' && query.equalTo === auth.uid",
       ".indexOn": [
         "studentId"
-      ]
+      ],
+      "$id": {
+        ".read": "auth != null && data.child('studentId').val() === auth.uid",
+        ".write": "auth != null && (!data.exists() || data.child('studentId').val() === auth.uid) && (!newData.exists() || newData.child('studentId').val() === auth.uid)"
+      }
+    },
+
+    "internships": {
+      ".read": "auth != null && query.orderByChild === 'studentId' && query.equalTo === auth.uid",
+      ".indexOn": [
+        "studentId"
+      ],
+      "$id": {
+        ".read": "auth != null && data.child('studentId').val() === auth.uid",
+        ".write": "auth != null && (!data.exists() || data.child('studentId').val() === auth.uid) && (!newData.exists() || newData.child('studentId').val() === auth.uid)"
+      }
+    },
+
+    "certifications": {
+      ".read": "auth != null && query.orderByChild === 'studentId' && query.equalTo === auth.uid",
+      ".indexOn": [
+        "studentId"
+      ],
+      "$id": {
+        ".read": "auth != null && data.child('studentId').val() === auth.uid",
+        ".write": "auth != null && (!data.exists() || data.child('studentId').val() === auth.uid) && (!newData.exists() || newData.child('studentId').val() === auth.uid)"
+      }
+    },
+
+    "achievements": {
+      ".read": "auth != null && query.orderByChild === 'studentId' && query.equalTo === auth.uid",
+      ".indexOn": [
+        "studentId"
+      ],
+      "$id": {
+        ".read": "auth != null && data.child('studentId').val() === auth.uid",
+        ".write": "auth != null && (!data.exists() || data.child('studentId').val() === auth.uid) && (!newData.exists() || newData.child('studentId').val() === auth.uid)"
+      }
+    },
+
+    "evidence": {
+      ".read": "auth != null && query.orderByChild === 'studentId' && query.equalTo === auth.uid",
+      ".indexOn": [
+        "studentId"
+      ],
+      "$id": {
+        ".read": "auth != null && data.child('studentId').val() === auth.uid",
+        ".write": "auth != null && (!data.exists() || data.child('studentId').val() === auth.uid) && (!newData.exists() || newData.child('studentId').val() === auth.uid)"
+      }
     },
 
     "jobs": {
