@@ -455,10 +455,18 @@ function DashboardContent() {
               </Link>
 
               {/* Skills listed */}
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <p className="text-sm font-medium text-slate-500">
-                  Skills listed
-                </p>
+              <Link
+                href="/profile"
+                className="group block rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow-xs"
+              >
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-slate-500">
+                    Skills listed
+                  </p>
+                  <span className="text-xs text-slate-400 transition group-hover:text-slate-900">
+                    Manage →
+                  </span>
+                </div>
 
                 <p className="mt-4 text-3xl font-bold text-slate-950">
                   {skillsListed === null ? "—" : skillsListed}
@@ -467,7 +475,7 @@ function DashboardContent() {
                 <p className="mt-2 text-xs text-slate-500">
                   Skills currently added to your profile
                 </p>
-              </div>
+              </Link>
 
               {/* Active opportunities */}
               <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -616,7 +624,10 @@ function DashboardContent() {
                 </div>
 
                 <div className="mt-6 space-y-3">
-                  <div className="rounded-xl border border-slate-200 p-4">
+                  <Link
+                    href="/profile"
+                    className="block rounded-xl border border-slate-200 p-4 transition hover:border-slate-300 hover:bg-slate-50"
+                  >
                     <p className="text-sm font-semibold text-slate-900">
                       Complete your profile
                     </p>
@@ -624,9 +635,12 @@ function DashboardContent() {
                     <p className="mt-1 text-xs leading-5 text-slate-500">
                       Add missing academic and professional information.
                     </p>
-                  </div>
+                  </Link>
 
-                  <div className="rounded-xl border border-slate-200 p-4">
+                  <Link
+                    href="/profile"
+                    className="block rounded-xl border border-slate-200 p-4 transition hover:border-slate-300 hover:bg-slate-50"
+                  >
                     <p className="text-sm font-semibold text-slate-900">
                       Add project evidence
                     </p>
@@ -634,7 +648,7 @@ function DashboardContent() {
                     <p className="mt-1 text-xs leading-5 text-slate-500">
                       Back your projects with verifiable evidence.
                     </p>
-                  </div>
+                  </Link>
 
                   <div className="rounded-xl border border-slate-200 p-4">
                     <p className="text-sm font-semibold text-slate-900">
