@@ -202,6 +202,8 @@ export interface AssessmentQuestion {
 export type ApplicationStatus =
   | "invited"
   | "applied"
+  | "shortlisted"
+  | "rejected"
   | "withdrawn";
 
 export interface Application {

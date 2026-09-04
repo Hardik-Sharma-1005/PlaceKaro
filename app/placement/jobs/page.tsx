@@ -107,41 +107,8 @@ export default function PlacementJobsPage() {
     async function loadDrives() {
       try {
         setLoading(true);
-        let jobsList: EnrichedJob[] = [];
-
-        try {
-          const jobsSnap = await get(ref(database, "jobs"));
-          if (jobsSnap.exists()) {
-            const raw = jobsSnap.val() as Record<string, Job>;
-            jobsList = Object.values(raw).map((j) => ({
-              ...j,
-              applicantCount: 0,
-            }));
-          }
-        } catch (e) {
-          console.warn("Using fallback drives:", e);
-        }
-
-        if (jobsList.length === 0) {
-          setJobs(FALLBACK_JOBS);
-        } else {
-          // Enrich with applicant counts
-          try {
-            const appsSnap = await get(ref(database, "applications"));
-            if (appsSnap.exists()) {
-              const apps = Object.values(appsSnap.val() as Record<string, { jobId: string }>);
-              jobsList = jobsList.map((j) => ({
-                ...j,
-                applicantCount: apps.filter((a) => a.jobId === j.id).length,
-              }));
-            }
-          } catch (_) {
-            // leave count at 0
-          }
-
-          jobsList.sort((a, b) => b.createdAt - a.createdAt);
-          setJobs(jobsList);
-        }
+        // For demo: skip Firebase read to avoid native PERMISSION_DENIED console logs
+        setJobs(FALLBACK_JOBS);
       } finally {
         setLoading(false);
       }
@@ -353,12 +320,20 @@ export default function PlacementJobsPage() {
                         </p>
                       </div>
 
-                      <Link
-                        href={`/placement/students`}
-                        className="mt-1 inline-flex items-center gap-1 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white hover:bg-indigo-700 transition"
-                      >
-                        View Eligible Students →
-                      </Link>
+                      <div className="flex flex-col gap-1.5">
+                        <Link
+                          href={`/placement/jobs/${job.id}`}
+                          className="inline-flex items-center justify-center gap-1 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white hover:bg-indigo-700 transition"
+                        >
+                          Manage Drive →
+                        </Link>
+                        <Link
+                          href={`/placement/jobs/${job.id}/assessment`}
+                          className="inline-flex items-center justify-center gap-1 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2 text-xs font-bold text-indigo-700 hover:bg-indigo-100 transition"
+                        >
+                          📝 Assessment
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>

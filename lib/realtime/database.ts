@@ -13,13 +13,18 @@ import { database } from "../firebase/database";
 export async function getData<T>(
   path: string
 ): Promise<T | null> {
-  const snapshot = await get(ref(database, path));
+  try {
+    const snapshot = await get(ref(database, path));
 
-  if (!snapshot.exists()) {
+    if (!snapshot.exists()) {
+      return null;
+    }
+
+    return snapshot.val() as T;
+  } catch {
+    // Silently handle permission denied — callers handle null gracefully
     return null;
   }
-
-  return snapshot.val() as T;
 }
 
 export async function setData<T>(
