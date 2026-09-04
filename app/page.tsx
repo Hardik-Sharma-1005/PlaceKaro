@@ -818,16 +818,19 @@ function StudentDashboard() {
 
               <Link
                 href="/profile"
-                className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-slate-100"
               >
                 <span className="h-2 w-2 rounded-full bg-slate-300" />
                 My Profile
               </Link>
 
-              <button className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-slate-100">
+              <Link
+                href="/opportunities"
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-slate-100"
+              >
                 <span className="h-2 w-2 rounded-full bg-slate-300" />
                 Opportunities
-              </button>
+              </Link>
 
               <button className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-slate-100">
                 <span className="h-2 w-2 rounded-full bg-slate-300" />
@@ -901,14 +904,17 @@ function StudentDashboard() {
 
               <Link
                 href="/profile"
-                className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
+                className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600"
               >
                 My Profile
               </Link>
 
-              <button className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600">
+              <Link
+                href="/opportunities"
+                className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600"
+              >
                 Opportunities
-              </button>
+              </Link>
 
               <button className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600">
                 Assessments
@@ -937,19 +943,10 @@ function StudentDashboard() {
             </section>
 
             <section className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              <Link
-                href="/profile"
-                className="group block rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow-xs"
-              >
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-slate-500">
-                    Profile completion
-                  </p>
-
-                  <span className="text-xs text-slate-400 transition group-hover:text-slate-900">
-                    Manage →
-                  </span>
-                </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <p className="text-sm font-medium text-slate-500">
+                  Profile completion
+                </p>
 
                 <div className="mt-4 flex items-end justify-between">
                   <p className="text-3xl font-bold text-slate-950">
@@ -977,21 +974,12 @@ function StudentDashboard() {
                     }}
                   />
                 </div>
-              </Link>
+              </div>
 
-              <Link
-                href="/profile"
-                className="group block rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow-xs"
-              >
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-slate-500">
-                    Skills listed
-                  </p>
-
-                  <span className="text-xs text-slate-400 transition group-hover:text-slate-900">
-                    Manage →
-                  </span>
-                </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <p className="text-sm font-medium text-slate-500">
+                  Skills listed
+                </p>
 
                 <p className="mt-4 text-3xl font-bold text-slate-950">
                   {skillsListed === null ? "—" : skillsListed}
@@ -1000,7 +988,7 @@ function StudentDashboard() {
                 <p className="mt-2 text-xs text-slate-500">
                   Skills currently added to your profile
                 </p>
-              </Link>
+              </div>
 
               <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <p className="text-sm font-medium text-slate-500">
@@ -1081,6 +1069,7 @@ function StudentDashboard() {
                   ))}
                 </div>
               </div>
+
 
               <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div>
@@ -1167,9 +1156,10 @@ function StudentDashboard() {
                     </div>
                   ) : (
                     publishedJobs.slice(0, 3).map((job) => (
-                      <div
+                      <Link
                         key={job.id}
-                        className="rounded-xl border border-slate-200 p-4 transition hover:border-slate-300 hover:bg-slate-50"
+                        href={`/opportunities/${job.id}`}
+                        className="block rounded-xl border border-slate-200 p-4 transition hover:border-slate-300 hover:bg-slate-50"
                       >
                         <div className="flex items-start justify-between gap-4">
                           <div>
@@ -1187,7 +1177,11 @@ function StudentDashboard() {
                             Open
                           </span>
                         </div>
-                      </div>
+
+                        <p className="mt-3 text-xs font-semibold text-slate-500">
+                          View opportunity →
+                        </p>
+                      </Link>
                     ))
                   )}
                 </div>
@@ -1307,5 +1301,5 @@ export default function Home() {
     );
   }
 
-  return <StudentDashboard />;
+  return <PublicLandingPage />;
 }

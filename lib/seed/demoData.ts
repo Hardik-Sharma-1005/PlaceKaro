@@ -475,6 +475,21 @@ export const demoJobs: Job[] = [
     createdAt: DEMO_TIMESTAMP,
     updatedAt: DEMO_TIMESTAMP,
   },
+  {
+    id: "job-002",
+    companyId: "company-001",
+    recruiterId: "recruiter-001",
+    title: "JSS SOFTWARE MANAGEMENT INTERN",
+    description:
+      "Looking for students with strong software development lifecycle knowledge, agile practices, SQL, Python and an interest in software management.",
+    status: "published",
+    assessmentId: "assessment-002",
+    assessmentAccessModel: "role_fit",
+    shortlistType: "top_n",
+    shortlistValue: 5,
+    createdAt: DEMO_TIMESTAMP,
+    updatedAt: DEMO_TIMESTAMP,
+  },
 ];
 
 export const demoJobRequirements: JobRequirements[] = [
@@ -495,6 +510,27 @@ export const demoJobRequirements: JobRequirements[] = [
         "Data Structures and Algorithms",
       ],
       domainSkills: ["Software Development"],
+      preferredQualifications: [
+        "Relevant projects",
+        "Internship experience",
+      ],
+    },
+    confirmedByCompany: true,
+  },
+  {
+    jobId: "job-002",
+    hardEligibility: {
+      branches: [
+        "Computer Science Engineering",
+        "Allied Branches",
+      ],
+      graduationYears: [2029],
+      minimumCGPA: 8.0,
+      maximumBacklogs: 2,
+    },
+    competencies: {
+      technicalSkills: ["SDLC", "Scrum", "Python", "SQL"],
+      domainSkills: ["Software Management"],
       preferredQualifications: [
         "Relevant projects",
         "Internship experience",
@@ -612,6 +648,15 @@ export const demoAssessments: Assessment[] = [
     published: true,
     createdAt: DEMO_TIMESTAMP,
   },
+  {
+    id: "assessment-002",
+    jobId: "job-002",
+    title: "Software Management Fundamentals",
+    durationMinutes: 30,
+    totalMarks: 20,
+    published: true,
+    createdAt: DEMO_TIMESTAMP,
+  },
 ];
 
 export const demoAssessmentQuestions: AssessmentQuestion[] = [
@@ -668,6 +713,64 @@ export const demoAssessmentQuestions: AssessmentQuestion[] = [
       B: "MySQL",
       C: "Python",
       D: "Firebase Realtime Database",
+    },
+    correctAnswer: "A",
+    marks: 5,
+  },
+  {
+    id: "question-005",
+    assessmentId: "assessment-002",
+    question: "What does SDLC stand for?",
+    type: "mcq",
+    options: {
+      A: "Software Development Life Cycle",
+      B: "System Design Logic Control",
+      C: "Software Deployment Level Control",
+      D: "System Development Lifecycle Cost",
+    },
+    correctAnswer: "A",
+    marks: 5,
+  },
+  {
+    id: "question-006",
+    assessmentId: "assessment-002",
+    question:
+      "Which Scrum role is primarily responsible for maximizing product value?",
+    type: "mcq",
+    options: {
+      A: "Scrum Master",
+      B: "Product Owner",
+      C: "Developer",
+      D: "Project Auditor",
+    },
+    correctAnswer: "B",
+    marks: 5,
+  },
+  {
+    id: "question-007",
+    assessmentId: "assessment-002",
+    question: "Which SQL statement is used to retrieve data from a table?",
+    type: "mcq",
+    options: {
+      A: "UPDATE",
+      B: "DELETE",
+      C: "SELECT",
+      D: "ALTER",
+    },
+    correctAnswer: "C",
+    marks: 5,
+  },
+  {
+    id: "question-008",
+    assessmentId: "assessment-002",
+    question:
+      "Which activity is commonly associated with software management?",
+    type: "mcq",
+    options: {
+      A: "Planning and coordinating software development work",
+      B: "Replacing all testing with manual review",
+      C: "Removing project documentation",
+      D: "Avoiding sprint planning",
     },
     correctAnswer: "A",
     marks: 5,
