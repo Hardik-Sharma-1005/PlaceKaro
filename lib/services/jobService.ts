@@ -205,4 +205,37 @@ export const jobService = {
       throw error;
     }
   },
+
+  /**
+   * Approves a job from the placement cell.
+   *
+   * Only a job currently waiting for approval should be
+   * transitioned to published.
+   */
+  async approveJob(jobId: string): Promise<void> {
+    try {
+      const jobRef = ref(database, `jobs/${jobId}`);
+      const snapshot = await get(jobRef);
+
+      if (!snapshot.exists()) {
+        throw new Error("Job not found.");
+      }
+
+      const currentJob = snapshot.val() as Omit<Job, "id">;
+
+      if (currentJob.status !== "pending_approval") {
+        throw new Error(
+          `Only jobs pending approval can be published. Current status: ${currentJob.status}.`
+        );
+      }
+
+      await update(jobRef, {
+        status: "published" as JobStatus,
+        updatedAt: Date.now(),
+      });
+    } catch (error) {
+      console.error("Error approving job:", error);
+      throw error;
+    }
+  },
 };

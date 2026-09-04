@@ -13,6 +13,7 @@ import type {
 } from "../../types/database";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { RoleGuard } from "../../lib/components/RoleGuard";
 
 // Fallback demonstration data if database is empty or restricted
 const FALLBACK_STUDENTS: StudentProfile[] = [
@@ -365,405 +366,407 @@ export default function PlacementDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      {/* Workspace Header */}
-      <header className="border-b border-slate-200 bg-white sticky top-0 z-10 shadow-xs">
-        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-8">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-indigo-600 animate-pulse" />
-              <p className="text-xs font-bold uppercase tracking-wider text-indigo-600">
-                Institutional Intelligence Command Center
-              </p>
-            </div>
-            <h1 className="text-xl font-bold text-slate-950 mt-0.5">
-              Placement Cell Portal
-            </h1>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Link
-              href="/placement"
-              className={`rounded-xl px-4 py-2 text-xs font-bold transition ${
-                pathname === "/placement"
-                  ? "bg-indigo-600 text-white shadow-xs"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-              }`}
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="/placement/students"
-              className={`rounded-xl px-4 py-2 text-xs font-bold transition ${
-                pathname === "/placement/students"
-                  ? "bg-indigo-600 text-white shadow-xs"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-              }`}
-            >
-              Student Directory
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      <main className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8 space-y-8">
-        {/* Welcome & Overview Header */}
-        <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
-              Cohort Employability & Placement Intelligence
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Institutional breakdown across readiness tiers, skill prevalence, assessment outcomes, and PIS metrics.
-            </p>
-          </div>
-
-          <div className="inline-flex items-center gap-2 self-start rounded-full bg-indigo-50 px-3.5 py-1.5 text-xs font-semibold text-indigo-700 border border-indigo-100">
-            <span>🎓 Active Academic Cycle: 2024–2026</span>
-          </div>
-        </section>
-
-        {/* 1. Primary Metrics Row */}
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Total Enrolled Students
-            </p>
-            <div className="mt-3 flex items-baseline justify-between">
-              <p className="text-3xl font-extrabold text-slate-950">{metrics.totalStudents}</p>
-              <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-bold text-indigo-600">
-                100% Tracked
-              </span>
-            </div>
-            <p className="mt-2 text-xs text-slate-500">Active verified student profiles</p>
-          </div>
-
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Placement-Ready Cohort
-            </p>
-            <div className="mt-3 flex items-baseline justify-between">
-              <p className="text-3xl font-extrabold text-emerald-600">{metrics.readyCount}</p>
-              <span className="text-xs font-bold text-slate-500">
-                {Math.round((metrics.readyCount / (metrics.totalStudents || 1)) * 100)}% of total
-              </span>
-            </div>
-            <div className="mt-3 h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
-              <div
-                className="h-full bg-emerald-500 rounded-full"
-                style={{ width: `${Math.round((metrics.readyCount / (metrics.totalStudents || 1)) * 100)}%` }}
-              />
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Institutional Avg PIS
-            </p>
-            <div className="mt-3 flex items-baseline justify-between">
-              <p className="text-3xl font-extrabold text-indigo-600">{pisMetrics.avgPIS}</p>
-              <span className="rounded-full bg-purple-50 px-2 py-0.5 text-[11px] font-bold text-purple-700">
-                Scale 0-1000
-              </span>
-            </div>
-            <p className="mt-2 text-xs text-slate-500">
-              {pisMetrics.eliteCount} students in Elite Tier (&ge;800)
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Assessment Pass Rate
-            </p>
-            <div className="mt-3 flex items-baseline justify-between">
-              <p className="text-3xl font-extrabold text-amber-600">{assessmentOutcomes.passRate}%</p>
-              <span className="text-xs font-bold text-slate-500">
-                {assessmentOutcomes.qualifiedCount}/{assessmentOutcomes.totalAttempts} cleared
-              </span>
-            </div>
-            <p className="mt-2 text-xs text-slate-500">Based on published role assessments</p>
-          </div>
-        </section>
-
-        {/* 2. Institutional PIS Insights (Hardik's Data) */}
-        <section className="rounded-2xl border border-indigo-100 bg-gradient-to-br from-white to-indigo-50/40 p-6 sm:p-8 shadow-xs">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-indigo-100/60">
+    <RoleGuard allowedRoles={["placement"]}>
+      <div className="min-h-screen bg-slate-50 text-slate-900">
+        {/* Workspace Header */}
+        <header className="border-b border-slate-200 bg-white sticky top-0 z-10 shadow-xs">
+          <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-8">
             <div>
-              <div className="inline-flex items-center gap-1.5 rounded-md bg-indigo-100 px-2.5 py-1 text-[11px] font-bold text-indigo-800">
-                ✨ Hardik's Placement Intelligence Engine
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-indigo-600 animate-pulse" />
+                <p className="text-xs font-bold uppercase tracking-wider text-indigo-600">
+                  Institutional Intelligence Command Center
+                </p>
               </div>
-              <h3 className="text-lg font-bold text-slate-950 mt-2">
-                Institutional PIS Distribution & Talent Supply
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Evaluates multi-factor candidate competence across verified coursework, skills, and projects.
-              </p>
+              <h1 className="text-xl font-bold text-slate-950 mt-0.5">
+                Placement Cell Portal
+              </h1>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="rounded-xl bg-white border border-indigo-200 px-4 py-2 text-center shadow-xs">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Campus Benchmark</p>
-                <p className="text-lg font-extrabold text-indigo-900">{pisMetrics.avgPIS} / 1000</p>
-              </div>
+
+            <div className="flex items-center gap-3">
+              <Link
+                href="/placement"
+                className={`rounded-xl px-4 py-2 text-xs font-bold transition ${
+                  pathname === "/placement"
+                    ? "bg-indigo-600 text-white shadow-xs"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                Dashboard
+              </Link>
+              <Link
+                href="/placement/students"
+                className={`rounded-xl px-4 py-2 text-xs font-bold transition ${
+                  pathname === "/placement/students"
+                    ? "bg-indigo-600 text-white shadow-xs"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                Student Directory
+              </Link>
             </div>
           </div>
+        </header>
 
-          <div className="mt-6 grid gap-4 sm:grid-cols-3">
-            {/* Elite Tier */}
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-emerald-900">Elite Talent (800–1000)</span>
-                <span className="rounded-full bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5">
-                  High Priority
-                </span>
-              </div>
-              <p className="mt-3 text-2xl font-extrabold text-emerald-800">{pisMetrics.eliteCount}</p>
-              <p className="mt-1 text-xs text-emerald-700">
-                Top candidates ready for immediate Tier-1 / Product company drives.
+        <main className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8 space-y-8">
+          {/* Welcome & Overview Header */}
+          <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+                Cohort Employability & Placement Intelligence
+              </h2>
+              <p className="mt-1 text-sm text-slate-500">
+                Institutional breakdown across readiness tiers, skill prevalence, assessment outcomes, and PIS metrics.
               </p>
             </div>
 
-            {/* Industry Ready Tier */}
-            <div className="rounded-xl border border-indigo-200 bg-indigo-50/60 p-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-indigo-900">Industry Ready (650–799)</span>
-                <span className="rounded-full bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5">
-                  Core Pool
+            <div className="inline-flex items-center gap-2 self-start rounded-full bg-indigo-50 px-3.5 py-1.5 text-xs font-semibold text-indigo-700 border border-indigo-100">
+              <span>🎓 Active Academic Cycle: 2024–2026</span>
+            </div>
+          </section>
+
+          {/* 1. Primary Metrics Row */}
+          <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                Total Enrolled Students
+              </p>
+              <div className="mt-3 flex items-baseline justify-between">
+                <p className="text-3xl font-extrabold text-slate-950">{metrics.totalStudents}</p>
+                <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-bold text-indigo-600">
+                  100% Tracked
                 </span>
               </div>
-              <p className="mt-3 text-2xl font-extrabold text-indigo-800">{pisMetrics.readyCount}</p>
-              <p className="mt-1 text-xs text-indigo-700">
-                Strong baseline profiles suitable for broad technology and analyst roles.
+              <p className="mt-2 text-xs text-slate-500">Active verified student profiles</p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                Placement-Ready Cohort
+              </p>
+              <div className="mt-3 flex items-baseline justify-between">
+                <p className="text-3xl font-extrabold text-emerald-600">{metrics.readyCount}</p>
+                <span className="text-xs font-bold text-slate-500">
+                  {Math.round((metrics.readyCount / (metrics.totalStudents || 1)) * 100)}% of total
+                </span>
+              </div>
+              <div className="mt-3 h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+                <div
+                  className="h-full bg-emerald-500 rounded-full"
+                  style={{ width: `${Math.round((metrics.readyCount / (metrics.totalStudents || 1)) * 100)}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                Institutional Avg PIS
+              </p>
+              <div className="mt-3 flex items-baseline justify-between">
+                <p className="text-3xl font-extrabold text-indigo-600">{pisMetrics.avgPIS}</p>
+                <span className="rounded-full bg-purple-50 px-2 py-0.5 text-[11px] font-bold text-purple-700">
+                  Scale 0-1000
+                </span>
+              </div>
+              <p className="mt-2 text-xs text-slate-500">
+                {pisMetrics.eliteCount} students in Elite Tier (&ge;800)
               </p>
             </div>
 
-            {/* Developing Tier */}
-            <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-amber-900">Developing (&lt; 650)</span>
-                <span className="rounded-full bg-amber-600 text-white text-[10px] font-bold px-2 py-0.5">
-                  Mentorship Needed
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                Assessment Pass Rate
+              </p>
+              <div className="mt-3 flex items-baseline justify-between">
+                <p className="text-3xl font-extrabold text-amber-600">{assessmentOutcomes.passRate}%</p>
+                <span className="text-xs font-bold text-slate-500">
+                  {assessmentOutcomes.qualifiedCount}/{assessmentOutcomes.totalAttempts} cleared
                 </span>
               </div>
-              <p className="mt-3 text-2xl font-extrabold text-amber-800">{pisMetrics.developingCount}</p>
-              <p className="mt-1 text-xs text-amber-700">
-                Requires profile enrichment, additional project evidence, or skill upgrades.
-              </p>
+              <p className="mt-2 text-xs text-slate-500">Based on published role assessments</p>
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* 3. Batch-wise & Branch-wise Insights Grid */}
-        <section className="grid gap-6 lg:grid-cols-2">
-          {/* Batch-Wise Insights */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
-            <div className="flex items-center justify-between mb-4">
+          {/* 2. Institutional PIS Insights (Hardik's Data) */}
+          <section className="rounded-2xl border border-indigo-100 bg-gradient-to-br from-white to-indigo-50/40 p-6 sm:p-8 shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-indigo-100/60">
               <div>
-                <h3 className="text-base font-bold text-slate-950">Batch-Wise Cohort Analytics</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Graduating class distribution and readiness</p>
-              </div>
-              <span className="text-xs font-semibold text-slate-400">{batchInsights.length} Cohorts</span>
-            </div>
-
-            <div className="space-y-4">
-              {batchInsights.map((b) => (
-                <div key={b.year} className="rounded-xl border border-slate-100 p-4 bg-slate-50/50">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-bold text-slate-900">Class of {b.year}</p>
-                      <p className="text-xs text-slate-500 mt-0.5">{b.count} enrolled students</p>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-sm font-extrabold text-indigo-600">{b.avgCompletion}%</span>
-                      <p className="text-[10px] text-slate-400 font-medium">Avg Readiness</p>
-                    </div>
-                  </div>
-                  <div className="mt-3 h-2 w-full rounded-full bg-slate-200 overflow-hidden">
-                    <div
-                      className={`h-full rounded-full ${
-                        b.avgCompletion >= 80
-                          ? "bg-emerald-500"
-                          : b.avgCompletion >= 60
-                          ? "bg-indigo-500"
-                          : "bg-amber-500"
-                      }`}
-                      style={{ width: `${b.avgCompletion}%` }}
-                    />
-                  </div>
+                <div className="inline-flex items-center gap-1.5 rounded-md bg-indigo-100 px-2.5 py-1 text-[11px] font-bold text-indigo-800">
+                  ✨ Hardik's Placement Intelligence Engine
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Branch-Wise Insights */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-base font-bold text-slate-950">Branch-Wise Readiness Breakdown</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Placement readiness per academic department</p>
+                <h3 className="text-lg font-bold text-slate-950 mt-2">
+                  Institutional PIS Distribution & Talent Supply
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Evaluates multi-factor candidate competence across verified coursework, skills, and projects.
+                </p>
               </div>
-              <span className="text-xs font-semibold text-slate-400">{branchInsights.length} Departments</span>
+              <div className="flex items-center gap-2">
+                <div className="rounded-xl bg-white border border-indigo-200 px-4 py-2 text-center shadow-xs">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Campus Benchmark</p>
+                  <p className="text-lg font-extrabold text-indigo-900">{pisMetrics.avgPIS} / 1000</p>
+                </div>
+              </div>
             </div>
 
-            <div className="space-y-3.5">
-              {branchInsights.map((item) => {
-                const readyPct = Math.round((item.readyCount / (item.count || 1)) * 100);
-                return (
-                  <div key={item.branch} className="rounded-xl border border-slate-100 p-3.5 bg-slate-50/40">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="font-semibold text-slate-800">{item.branch}</span>
-                      <span className="text-xs font-bold text-slate-600">
-                        {item.readyCount} / {item.count} ready ({readyPct}%)
-                      </span>
+            <div className="mt-6 grid gap-4 sm:grid-cols-3">
+              {/* Elite Tier */}
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-emerald-900">Elite Talent (800–1000)</span>
+                  <span className="rounded-full bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5">
+                    High Priority
+                  </span>
+                </div>
+                <p className="mt-3 text-2xl font-extrabold text-emerald-800">{pisMetrics.eliteCount}</p>
+                <p className="mt-1 text-xs text-emerald-700">
+                  Top candidates ready for immediate Tier-1 / Product company drives.
+                </p>
+              </div>
+
+              {/* Industry Ready Tier */}
+              <div className="rounded-xl border border-indigo-200 bg-indigo-50/60 p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-indigo-900">Industry Ready (650–799)</span>
+                  <span className="rounded-full bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5">
+                    Core Pool
+                  </span>
+                </div>
+                <p className="mt-3 text-2xl font-extrabold text-indigo-800">{pisMetrics.readyCount}</p>
+                <p className="mt-1 text-xs text-indigo-700">
+                  Strong baseline profiles suitable for broad technology and analyst roles.
+                </p>
+              </div>
+
+              {/* Developing Tier */}
+              <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-amber-900">Developing (&lt; 650)</span>
+                  <span className="rounded-full bg-amber-600 text-white text-[10px] font-bold px-2 py-0.5">
+                    Mentorship Needed
+                  </span>
+                </div>
+                <p className="mt-3 text-2xl font-extrabold text-amber-800">{pisMetrics.developingCount}</p>
+                <p className="mt-1 text-xs text-amber-700">
+                  Requires profile enrichment, additional project evidence, or skill upgrades.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* 3. Batch-wise & Branch-wise Insights Grid */}
+          <section className="grid gap-6 lg:grid-cols-2">
+            {/* Batch-Wise Insights */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-base font-bold text-slate-950">Batch-Wise Cohort Analytics</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">Graduating class distribution and readiness</p>
+                </div>
+                <span className="text-xs font-semibold text-slate-400">{batchInsights.length} Cohorts</span>
+              </div>
+
+              <div className="space-y-4">
+                {batchInsights.map((b) => (
+                  <div key={b.year} className="rounded-xl border border-slate-100 p-4 bg-slate-50/50">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-bold text-slate-900">Class of {b.year}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">{b.count} enrolled students</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-sm font-extrabold text-indigo-600">{b.avgCompletion}%</span>
+                        <p className="text-[10px] text-slate-400 font-medium">Avg Readiness</p>
+                      </div>
                     </div>
-                    <div className="mt-2.5 h-2 w-full rounded-full bg-slate-200 overflow-hidden">
+                    <div className="mt-3 h-2 w-full rounded-full bg-slate-200 overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-indigo-600"
-                        style={{ width: `${readyPct}%` }}
+                        className={`h-full rounded-full ${
+                          b.avgCompletion >= 80
+                            ? "bg-emerald-500"
+                            : b.avgCompletion >= 60
+                            ? "bg-indigo-500"
+                            : "bg-amber-500"
+                        }`}
+                        style={{ width: `${b.avgCompletion}%` }}
                       />
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* 4. Skill Distribution & Employability Gaps */}
-        <section className="grid gap-6 lg:grid-cols-2">
-          {/* Skill / Capability Distribution */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-base font-bold text-slate-950">Campus Skill & Capability Supply</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Most prevalent technical skills across the student body</p>
+                ))}
               </div>
-              <span className="text-xs font-semibold text-indigo-600">Verified Skills</span>
             </div>
 
-            <div className="space-y-3">
-              {skillDistribution.map((skill) => (
-                <div key={skill.name} className="flex items-center justify-between rounded-xl border border-slate-100 p-3 hover:bg-slate-50 transition">
-                  <div>
-                    <p className="text-sm font-bold text-slate-900">{skill.name}</p>
-                    <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-                      {skill.category}
-                    </span>
+            {/* Branch-Wise Insights */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-base font-bold text-slate-950">Branch-Wise Readiness Breakdown</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">Placement readiness per academic department</p>
+                </div>
+                <span className="text-xs font-semibold text-slate-400">{branchInsights.length} Departments</span>
+              </div>
+
+              <div className="space-y-3.5">
+                {branchInsights.map((item) => {
+                  const readyPct = Math.round((item.readyCount / (item.count || 1)) * 100);
+                  return (
+                    <div key={item.branch} className="rounded-xl border border-slate-100 p-3.5 bg-slate-50/40">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-semibold text-slate-800">{item.branch}</span>
+                        <span className="text-xs font-bold text-slate-600">
+                          {item.readyCount} / {item.count} ready ({readyPct}%)
+                        </span>
+                      </div>
+                      <div className="mt-2.5 h-2 w-full rounded-full bg-slate-200 overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-indigo-600"
+                          style={{ width: `${readyPct}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+
+          {/* 4. Skill Distribution & Employability Gaps */}
+          <section className="grid gap-6 lg:grid-cols-2">
+            {/* Skill / Capability Distribution */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-base font-bold text-slate-950">Campus Skill & Capability Supply</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">Most prevalent technical skills across the student body</p>
+                </div>
+                <span className="text-xs font-semibold text-indigo-600">Verified Skills</span>
+              </div>
+
+              <div className="space-y-3">
+                {skillDistribution.map((skill) => (
+                  <div key={skill.name} className="flex items-center justify-between rounded-xl border border-slate-100 p-3 hover:bg-slate-50 transition">
+                    <div>
+                      <p className="text-sm font-bold text-slate-900">{skill.name}</p>
+                      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                        {skill.category}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 border border-indigo-100">
+                        {skill.count} Students
+                      </span>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 border border-indigo-100">
-                      {skill.count} Students
-                    </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Profile & Employability Gaps */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-base font-bold text-slate-950">Employability Gaps & Action Center</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">Critical risk factors requiring intervention</p>
+                </div>
+                <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700 border border-amber-200">
+                  Action Required
+                </span>
+              </div>
+
+              <div className="space-y-3.5">
+                <div className="flex items-start gap-3 rounded-xl border border-amber-100 bg-amber-50/50 p-4">
+                  <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-800 text-xs font-bold">
+                    ⚠️
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-amber-950">Incomplete Profiles (&lt; 50%)</p>
+                    <p className="text-xs text-amber-800 mt-0.5">
+                      <span className="font-bold">{employabilityGaps.lowProfileCount} students</span> lack necessary portfolio details or evidence.
+                    </p>
+                    <p className="text-[11px] font-medium text-amber-700 mt-2">
+                      → Recommended: Broadcast profile completion reminder.
+                    </p>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
 
-          {/* Profile & Employability Gaps */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
-            <div className="flex items-center justify-between mb-4">
+                <div className="flex items-start gap-3 rounded-xl border border-red-100 bg-red-50/50 p-4">
+                  <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-red-100 text-red-800 text-xs font-bold">
+                    ⛔
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-red-950">Backlog Vulnerability</p>
+                    <p className="text-xs text-red-800 mt-0.5">
+                      <span className="font-bold">{employabilityGaps.backlogRiskCount} students</span> have active academic backlogs, impacting standard eligibility cutoffs.
+                    </p>
+                    <p className="text-[11px] font-medium text-red-700 mt-2">
+                      → Recommended: Guide toward companies with relaxed backlog criteria.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 rounded-xl border border-indigo-100 bg-indigo-50/50 p-4">
+                  <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-800 text-xs font-bold">
+                    🎯
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-indigo-950">Zero Application Inactivity</p>
+                    <p className="text-xs text-indigo-800 mt-0.5">
+                      <span className="font-bold">{employabilityGaps.zeroApplicationsCount} candidates</span> have not yet applied to any active campus opportunity.
+                    </p>
+                    <p className="text-[11px] font-medium text-indigo-700 mt-2">
+                      → Recommended: Schedule targeted counseling session.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* 5. Assessment & Recruitment Outcomes Summary */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
               <div>
-                <h3 className="text-base font-bold text-slate-950">Employability Gaps & Action Center</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Critical risk factors requiring intervention</p>
+                <h3 className="text-base font-bold text-slate-950">Assessment & Recruitment Conversion Outcomes</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Evaluation results from published technical assessments across all active jobs.
+                </p>
               </div>
-              <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700 border border-amber-200">
-                Action Required
-              </span>
+              <Link
+                href="/placement/students"
+                className="text-xs font-bold text-indigo-600 hover:text-indigo-800 self-start sm:self-auto"
+              >
+                Explore Student Directory →
+              </Link>
             </div>
 
-            <div className="space-y-3.5">
-              <div className="flex items-start gap-3 rounded-xl border border-amber-100 bg-amber-50/50 p-4">
-                <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-800 text-xs font-bold">
-                  ⚠️
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-amber-950">Incomplete Profiles (&lt; 50%)</p>
-                  <p className="text-xs text-amber-800 mt-0.5">
-                    <span className="font-bold">{employabilityGaps.lowProfileCount} students</span> lack necessary portfolio details or evidence.
-                  </p>
-                  <p className="text-[11px] font-medium text-amber-700 mt-2">
-                    &rarr; Recommended: Broadcast profile completion reminder.
-                  </p>
-                </div>
+            <div className="mt-6 grid gap-4 sm:grid-cols-4">
+              <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 text-center">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Tests Taken</p>
+                <p className="mt-2 text-2xl font-extrabold text-slate-900">{assessmentOutcomes.totalAttempts}</p>
+                <p className="mt-1 text-[11px] text-slate-500">Candidate submissions</p>
               </div>
 
-              <div className="flex items-start gap-3 rounded-xl border border-red-100 bg-red-50/50 p-4">
-                <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-red-100 text-red-800 text-xs font-bold">
-                  ⛔
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-red-950">Backlog Vulnerability</p>
-                  <p className="text-xs text-red-800 mt-0.5">
-                    <span className="font-bold">{employabilityGaps.backlogRiskCount} students</span> have active academic backlogs, impacting standard eligibility cutoffs.
-                  </p>
-                  <p className="text-[11px] font-medium text-red-700 mt-2">
-                    &rarr; Recommended: Guide toward companies with relaxed backlog criteria.
-                  </p>
-                </div>
+              <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 text-center">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Qualified Count</p>
+                <p className="mt-2 text-2xl font-extrabold text-emerald-600">{assessmentOutcomes.qualifiedCount}</p>
+                <p className="mt-1 text-[11px] text-slate-500">Passed cutoff threshold</p>
               </div>
 
-              <div className="flex items-start gap-3 rounded-xl border border-indigo-100 bg-indigo-50/50 p-4">
-                <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-800 text-xs font-bold">
-                  🎯
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-indigo-950">Zero Application Inactivity</p>
-                  <p className="text-xs text-indigo-800 mt-0.5">
-                    <span className="font-bold">{employabilityGaps.zeroApplicationsCount} candidates</span> have not yet applied to any active campus opportunity.
-                  </p>
-                  <p className="text-[11px] font-medium text-indigo-700 mt-2">
-                    &rarr; Recommended: Schedule targeted counseling session.
-                  </p>
-                </div>
+              <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 text-center">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Average Test Score</p>
+                <p className="mt-2 text-2xl font-extrabold text-indigo-600">{assessmentOutcomes.avgPercentage}%</p>
+                <p className="mt-1 text-[11px] text-slate-500">Across all attempts</p>
+              </div>
+
+              <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 text-center">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Overall Pass Rate</p>
+                <p className="mt-2 text-2xl font-extrabold text-amber-600">{assessmentOutcomes.passRate}%</p>
+                <p className="mt-1 text-[11px] text-slate-500">Institutional clearance</p>
               </div>
             </div>
-          </div>
-        </section>
-
-        {/* 5. Assessment & Recruitment Outcomes Summary */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
-            <div>
-              <h3 className="text-base font-bold text-slate-950">Assessment & Recruitment Conversion Outcomes</h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Evaluation results from published technical assessments across all active jobs.
-              </p>
-            </div>
-            <Link
-              href="/placement/students"
-              className="text-xs font-bold text-indigo-600 hover:text-indigo-800 self-start sm:self-auto"
-            >
-              Explore Student Directory &rarr;
-            </Link>
-          </div>
-
-          <div className="mt-6 grid gap-4 sm:grid-cols-4">
-            <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 text-center">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Tests Taken</p>
-              <p className="mt-2 text-2xl font-extrabold text-slate-900">{assessmentOutcomes.totalAttempts}</p>
-              <p className="mt-1 text-[11px] text-slate-500">Candidate submissions</p>
-            </div>
-
-            <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 text-center">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Qualified Count</p>
-              <p className="mt-2 text-2xl font-extrabold text-emerald-600">{assessmentOutcomes.qualifiedCount}</p>
-              <p className="mt-1 text-[11px] text-slate-500">Passed cutoff threshold</p>
-            </div>
-
-            <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 text-center">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Average Test Score</p>
-              <p className="mt-2 text-2xl font-extrabold text-indigo-600">{assessmentOutcomes.avgPercentage}%</p>
-              <p className="mt-1 text-[11px] text-slate-500">Across all attempts</p>
-            </div>
-
-            <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 text-center">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Overall Pass Rate</p>
-              <p className="mt-2 text-2xl font-extrabold text-amber-600">{assessmentOutcomes.passRate}%</p>
-              <p className="mt-1 text-[11px] text-slate-500">Institutional clearance</p>
-            </div>
-          </div>
-        </section>
-      </main>
-    </div>
+          </section>
+        </main>
+      </div>
+    </RoleGuard>
   );
 }

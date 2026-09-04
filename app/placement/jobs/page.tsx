@@ -5,6 +5,8 @@ import { get, ref } from "firebase/database";
 import { database } from "../../../lib/firebase/database";
 import type { Job, JobRequirements, JobStatus } from "../../../types/database";
 import Link from "next/link";
+import { RoleGuard } from "../../../lib/components/RoleGuard";
+import { jobService } from "../../../lib/services/jobService";
 
 interface EnrichedJob extends Job {
   companyName?: string;
@@ -151,13 +153,19 @@ const STATUS_CONFIG: Record<
   },
 };
 
-export default function PlacementJobsPage() {
+function PlacementJobsContent() {
   const [loading, setLoading] = useState(true);
   const [jobs, setJobs] = useState<EnrichedJob[]>([]);
   const [statusFilter, setStatusFilter] = useState<
     "all" | JobStatus
   >("all");
   const [searchQuery, setSearchQuery] = useState("");
+
+  const [approvingJobId, setApprovingJobId] = useState<string | null>(
+    null
+  );
+
+  const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadDrives() {
@@ -172,8 +180,9 @@ export default function PlacementJobsPage() {
           if (jobsSnap.exists()) {
             const raw = jobsSnap.val() as Record<string, Job>;
 
-            jobsList = Object.values(raw).map((job) => ({
+            jobsList = Object.entries(raw).map(([key, job]) => ({
               ...job,
+              id: job.id || key,
               applicantCount: 0,
             }));
           }
@@ -211,8 +220,43 @@ export default function PlacementJobsPage() {
       }
     }
 
-    loadDrives();
+    void loadDrives();
   }, []);
+
+  const handleApproveJob = async (job: EnrichedJob): Promise<void> => {
+    if (job.status !== "pending_approval") {
+      return;
+    }
+
+    try {
+      setApprovingJobId(job.id);
+      setActionError(null);
+
+      await jobService.approveJob(job.id);
+
+      setJobs((currentJobs) =>
+        currentJobs.map((currentJob) =>
+          currentJob.id === job.id
+            ? {
+                ...currentJob,
+                status: "published",
+                updatedAt: Date.now(),
+              }
+            : currentJob
+        )
+      );
+    } catch (error) {
+      console.error("Failed to approve job:", error);
+
+      setActionError(
+        error instanceof Error
+          ? error.message
+          : "Unable to approve the job."
+      );
+    } finally {
+      setApprovingJobId(null);
+    }
+  };
 
   const filtered = jobs.filter((job) => {
     const matchesStatus =
@@ -281,6 +325,17 @@ export default function PlacementJobsPage() {
             Applicants
           </div>
         </section>
+
+        {actionError && (
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+            <p className="text-sm font-semibold text-red-900">
+              Approval failed
+            </p>
+            <p className="mt-1 text-sm text-red-700">
+              {actionError}
+            </p>
+          </div>
+        )}
 
         <section className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {[
@@ -457,18 +512,18 @@ export default function PlacementJobsPage() {
                             </span>
                           )}
 
-                        {req?.branches?.map((branch) => (
+                        {req?.branches?.map((branch, index) => (
                           <span
-                            key={branch}
+                            key={`${job.id}-branch-${branch}-${index}`}
                             className="rounded-md bg-indigo-50 text-indigo-700 px-2 py-0.5 text-[11px] font-semibold border border-indigo-100"
                           >
                             {branch}
                           </span>
                         ))}
 
-                        {skills.slice(0, 3).map((skill) => (
+                        {skills.slice(0, 3).map((skill, index) => (
                           <span
-                            key={skill}
+                            key={`${job.id}-skill-${skill}-${index}`}
                             className="rounded-md bg-emerald-50 text-emerald-700 px-2 py-0.5 text-[11px] font-semibold border border-emerald-100"
                           >
                             {skill}
@@ -510,12 +565,25 @@ export default function PlacementJobsPage() {
                         </p>
                       </div>
 
-                      <Link
-                        href="/placement/students"
-                        className="mt-1 inline-flex items-center gap-1 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white hover:bg-indigo-700 transition"
-                      >
-                        View Eligible Students →
-                      </Link>
+                      {job.status === "pending_approval" ? (
+                        <button
+                          type="button"
+                          onClick={() => void handleApproveJob(job)}
+                          disabled={approvingJobId === job.id}
+                          className="mt-1 inline-flex items-center justify-center gap-1 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 transition disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {approvingJobId === job.id
+                            ? "Publishing..."
+                            : "✓ Approve & Publish"}
+                        </button>
+                      ) : (
+                        <Link
+                          href="/placement/students"
+                          className="mt-1 inline-flex items-center gap-1 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white hover:bg-indigo-700 transition"
+                        >
+                          View Eligible Students →
+                        </Link>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -525,5 +593,13 @@ export default function PlacementJobsPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function PlacementJobsPage() {
+  return (
+    <RoleGuard allowedRoles={["placement"]}>
+      <PlacementJobsContent />
+    </RoleGuard>
   );
 }

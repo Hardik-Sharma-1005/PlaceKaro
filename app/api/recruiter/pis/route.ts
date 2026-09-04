@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import {
   buildServerPISInput,
+  calculatePISFromAdminFirebase,
 } from "../../../../lib/pis/serverService";
 
 import { adminDatabase } from "../../../../lib/seed/firebaseAdmin";
@@ -126,6 +127,71 @@ export async function GET(
           error instanceof Error
             ? error.message
             : "Unable to load recruiter PIS data.",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(
+  request: Request
+) {
+  try {
+    const body = (await request.json()) as {
+      studentId?: unknown;
+      jobId?: unknown;
+    };
+
+    const studentId = body.studentId;
+    const jobId = body.jobId;
+
+    if (
+      typeof studentId !== "string" ||
+      studentId.trim().length === 0
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "studentId is required.",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (
+      typeof jobId !== "string" ||
+      jobId.trim().length === 0
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "jobId is required.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const result =
+      await calculatePISFromAdminFirebase(
+        studentId,
+        jobId
+      );
+
+    return NextResponse.json({
+      result,
+    });
+  } catch (error) {
+    console.error(
+      "Recruiter PIS POST error:",
+      error
+    );
+
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Unable to calculate recruiter PIS.",
       },
       { status: 500 }
     );

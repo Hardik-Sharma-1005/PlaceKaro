@@ -81,10 +81,31 @@
     },
 
     "jobs": {
-      ".read": "auth != null && query.orderByChild === 'status' && query.equalTo === 'published'",
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'placement' || (query.orderByChild === 'status' && query.equalTo === 'published') || (query.orderByChild === 'companyId' && query.equalTo === auth.uid))",
       ".indexOn": [
-        "status"
-      ]
+        "status",
+        "companyId"
+      ],
+
+      "$jobId": {
+        ".read": "auth != null && (data.child('companyId').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'placement')",
+
+        ".write": "auth != null && ((root.child('users').child(auth.uid).child('role').val() === 'placement' && data.exists() && data.child('status').val() === 'pending_approval' && newData.child('status').val() === 'published' && newData.child('companyId').val() === data.child('companyId').val()) || (data.child('companyId').val() === auth.uid && newData.child('companyId').val() === auth.uid && (!data.exists() || newData.child('status').val() !== 'published')))"
+      }
+    },
+
+    "jobRequirements": {
+      "$jobId": {
+        ".read": "auth != null && (root.child('jobs').child($jobId).child('companyId').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'placement')",
+        ".write": "auth != null && root.child('jobs').child($jobId).child('companyId').val() === auth.uid"
+      }
+    },
+
+    "pisConfigurations": {
+      "$jobId": {
+        ".read": "auth != null && (root.child('jobs').child($jobId).child('companyId').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'placement')",
+        ".write": "auth != null && root.child('jobs').child($jobId).child('companyId').val() === auth.uid"
+      }
     },
 
     "applications": {
