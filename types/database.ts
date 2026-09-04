@@ -1,4 +1,3 @@
-
 // types/database.ts
 
 export type UserRole = "student" | "company" | "placement";
@@ -120,7 +119,12 @@ export interface CompanyRecruiter {
   verificationStatus: VerificationStatus;
 }
 
-export type JobStatus = "draft" | "published" | "closed";
+export type JobStatus =
+  | "draft"
+  | "pending_approval"
+  | "published"
+  | "closed"
+  | "rejected";
 
 export type AssessmentAccessModel =
   | "all_eligible"
@@ -223,6 +227,10 @@ export interface AssessmentQuestion {
 export type ApplicationStatus =
   | "invited"
   | "applied"
+  | "under_review"
+  | "shortlisted"
+  | "rejected"
+  | "hired"
   | "withdrawn";
 
 export interface Application {
@@ -234,7 +242,28 @@ export interface Application {
   assessmentUnlocked: boolean;
 }
 
-export type AssessmentResultStatus = "qualified" | "not_qualified";
+export type InterviewStatus =
+  | "scheduled"
+  | "completed"
+  | "cancelled";
+
+export interface Interview {
+  id: string;
+  applicationId: string;
+  jobId: string;
+  studentId: string;
+  recruiterId: string;
+  roundName: string;
+  scheduledAt: number;
+  meetingLink?: string;
+  location?: string;
+  status: InterviewStatus;
+  feedback?: string;
+}
+
+export type AssessmentResultStatus =
+  | "qualified"
+  | "not_qualified";
 
 export interface AssessmentResult {
   id: string;
