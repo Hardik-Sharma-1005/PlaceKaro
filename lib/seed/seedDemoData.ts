@@ -1,5 +1,5 @@
 import {
-  demoAchievements,  
+  demoAchievements,
   demoAssessmentQuestions,
   demoAssessments,
   demoAssessmentResults,
@@ -13,6 +13,7 @@ import {
   demoJobRequirements,
   demoJobs,
   demoNotifications,
+  demoPISConfigurations,
   demoPISComponents,
   demoPISScores,
   demoProjects,
@@ -32,7 +33,10 @@ export async function seedDemoData(): Promise<void> {
   }
 
   for (const profile of demoStudentProfiles) {
-    await setData(`studentProfiles/${profile.userId}`, profile);
+    await setData(
+      `studentProfiles/${profile.userId}`,
+      profile
+    );
   }
 
   for (const skill of demoSkills) {
@@ -44,27 +48,45 @@ export async function seedDemoData(): Promise<void> {
   }
 
   for (const internship of demoInternships) {
-    await setData(`internships/${internship.id}`, internship);
+    await setData(
+      `internships/${internship.id}`,
+      internship
+    );
   }
 
   for (const certification of demoCertifications) {
-    await setData(`certifications/${certification.id}`, certification);
+    await setData(
+      `certifications/${certification.id}`,
+      certification
+    );
   }
 
   for (const achievement of demoAchievements) {
-    await setData(`achievements/${achievement.id}`, achievement);
+    await setData(
+      `achievements/${achievement.id}`,
+      achievement
+    );
   }
 
   for (const evidence of demoEvidence) {
-    await setData(`evidence/${evidence.id}`, evidence);
+    await setData(
+      `evidence/${evidence.id}`,
+      evidence
+    );
   }
 
   for (const company of demoCompanies) {
-    await setData(`companies/${company.id}`, company);
+    await setData(
+      `companies/${company.id}`,
+      company
+    );
   }
 
   for (const recruiter of demoCompanyRecruiters) {
-    await setData(`companyRecruiters/${recruiter.id}`, recruiter);
+    await setData(
+      `companyRecruiters/${recruiter.id}`,
+      recruiter
+    );
   }
 
   for (const job of demoJobs) {
@@ -72,38 +94,72 @@ export async function seedDemoData(): Promise<void> {
   }
 
   for (const requirements of demoJobRequirements) {
-    await setData(`jobRequirements/${requirements.jobId}`, requirements);
+    await setData(
+      `jobRequirements/${requirements.jobId}`,
+      requirements
+    );
+  }
+
+  for (const configuration of demoPISConfigurations) {
+    await setData(
+      `pisConfigurations/${configuration.jobId}`,
+      configuration
+    );
   }
 
   for (const pisScore of demoPISScores) {
-    await setData(`pisScores/${pisScore.id}`, pisScore);
+    await setData(
+      `pisScores/${pisScore.id}`,
+      pisScore
+    );
   }
 
   for (const pisComponents of demoPISComponents) {
-    await setData(`pisComponents/${pisComponents.pisId}`, pisComponents);
+    await setData(
+      `pisComponents/${pisComponents.pisId}`,
+      pisComponents
+    );
   }
 
   for (const assessment of demoAssessments) {
-    await setData(`assessments/${assessment.id}`, assessment);
+    await setData(
+      `assessments/${assessment.id}`,
+      assessment
+    );
   }
 
   for (const question of demoAssessmentQuestions) {
-    await setData(`assessmentQuestions/${question.id}`, question);
+    await setData(
+      `assessmentQuestions/${question.id}`,
+      question
+    );
   }
 
   for (const application of demoApplications) {
-    await setData(`applications/${application.id}`, application);
+    await setData(
+      `applications/${application.id}`,
+      application
+    );
   }
 
   for (const result of demoAssessmentResults) {
-    await setData(`assessmentResults/${result.id}`, result);
+    await setData(
+      `assessmentResults/${result.id}`,
+      result
+    );
   }
 
   for (const bookmark of demoBookmarks) {
-    await setData(`bookmarks/${bookmark.id}`, bookmark);
+    await setData(
+      `bookmarks/${bookmark.id}`,
+      bookmark
+    );
   }
 
   for (const notification of demoNotifications) {
-    await setData(`notifications/${notification.id}`, notification);
+    await setData(
+      `notifications/${notification.id}`,
+      notification
+    );
   }
 }

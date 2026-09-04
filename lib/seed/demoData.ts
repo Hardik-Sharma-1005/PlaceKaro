@@ -13,6 +13,7 @@ import type {
   Job,
   JobRequirements,
   Notification,
+  PISConfiguration,
   PISComponents,
   PISScore,
   Project,
@@ -123,6 +124,7 @@ export const demoSkills: Skill[] = [
     name: "Python",
     category: "Programming",
     level: "Advanced",
+    evidenceIds: ["evidence-001"],
   },
   {
     id: "skill-002",
@@ -130,6 +132,7 @@ export const demoSkills: Skill[] = [
     name: "Data Structures and Algorithms",
     category: "Computer Science",
     level: "Intermediate",
+    evidenceIds: ["evidence-002"],
   },
   {
     id: "skill-003",
@@ -137,6 +140,7 @@ export const demoSkills: Skill[] = [
     name: "React",
     category: "Web Development",
     level: "Intermediate",
+    evidenceIds: ["evidence-003"],
   },
   {
     id: "skill-004",
@@ -144,6 +148,7 @@ export const demoSkills: Skill[] = [
     name: "Python",
     category: "Programming",
     level: "Advanced",
+    evidenceIds: ["evidence-007"],
   },
   {
     id: "skill-005",
@@ -151,6 +156,7 @@ export const demoSkills: Skill[] = [
     name: "Machine Learning",
     category: "AI",
     level: "Advanced",
+    evidenceIds: ["evidence-008"],
   },
   {
     id: "skill-006",
@@ -158,6 +164,7 @@ export const demoSkills: Skill[] = [
     name: "SQL",
     category: "Data",
     level: "Intermediate",
+    evidenceIds: ["evidence-009"],
   },
   {
     id: "skill-007",
@@ -165,6 +172,7 @@ export const demoSkills: Skill[] = [
     name: "Java",
     category: "Programming",
     level: "Intermediate",
+    evidenceIds: ["evidence-013"],
   },
   {
     id: "skill-008",
@@ -172,6 +180,7 @@ export const demoSkills: Skill[] = [
     name: "SQL",
     category: "Data",
     level: "Intermediate",
+    evidenceIds: ["evidence-014"],
   },
 ];
 
@@ -184,6 +193,7 @@ export const demoProjects: Project[] = [
       "A web application that analyzes student employability data and highlights placement readiness.",
     technologies: ["Python", "React", "Firebase"],
     role: "Full Stack Developer",
+    evidenceIds: ["evidence-004"],
   },
   {
     id: "project-002",
@@ -193,6 +203,7 @@ export const demoProjects: Project[] = [
       "A machine learning model that predicts student performance using academic indicators.",
     technologies: ["Python", "Pandas", "Scikit-learn"],
     role: "Machine Learning Developer",
+    evidenceIds: ["evidence-010"],
   },
   {
     id: "project-003",
@@ -202,6 +213,7 @@ export const demoProjects: Project[] = [
       "A database-backed application for managing inventory, orders, and stock levels.",
     technologies: ["Java", "SQL"],
     role: "Backend Developer",
+    evidenceIds: ["evidence-015"],
   },
 ];
 
@@ -213,6 +225,7 @@ export const demoInternships: Internship[] = [
     role: "Software Engineering Intern",
     description:
       "Worked on internal web tools and contributed to backend APIs.",
+    evidenceIds: ["evidence-005"],
   },
   {
     id: "internship-002",
@@ -221,6 +234,7 @@ export const demoInternships: Internship[] = [
     role: "Machine Learning Intern",
     description:
       "Worked on data preparation and baseline machine learning models.",
+    evidenceIds: ["evidence-011"],
   },
 ];
 
@@ -231,6 +245,7 @@ export const demoCertifications: Certification[] = [
     title: "Python Programming Fundamentals",
     issuer: "Coursera",
     issueDate: "2026-05-15",
+    evidenceId: "evidence-006",
   },
   {
     id: "cert-002",
@@ -238,6 +253,7 @@ export const demoCertifications: Certification[] = [
     title: "Machine Learning Foundations",
     issuer: "Google",
     issueDate: "2026-06-20",
+    evidenceId: "evidence-012",
   },
 ];
 
@@ -249,6 +265,7 @@ export const demoAchievements: Achievement[] = [
     organization: "University Innovation Challenge",
     date: "2026-04-10",
     category: "Hackathon",
+    evidenceId: "evidence-016",
   },
   {
     id: "achievement-002",
@@ -257,6 +274,7 @@ export const demoAchievements: Achievement[] = [
     organization: "JSS University Noida",
     date: "2026-03-18",
     category: "Academic",
+    evidenceId: "evidence-017",
   },
 ];
 
@@ -273,6 +291,24 @@ export const demoEvidence: Evidence[] = [
   {
     id: "evidence-002",
     studentId: "demo-student-001",
+    type: "skill",
+    title: "Data Structures and Algorithms Skill Evidence",
+    uploadedAt: DEMO_TIMESTAMP,
+    verificationStatus: "verified",
+    verifiedAt: DEMO_TIMESTAMP,
+  },
+  {
+    id: "evidence-003",
+    studentId: "demo-student-001",
+    type: "skill",
+    title: "React Skill Evidence",
+    uploadedAt: DEMO_TIMESTAMP,
+    verificationStatus: "verified",
+    verifiedAt: DEMO_TIMESTAMP,
+  },
+  {
+    id: "evidence-004",
+    studentId: "demo-student-001",
     type: "project",
     title: "Campus Placement Analyzer Evidence",
     uploadedAt: DEMO_TIMESTAMP,
@@ -280,10 +316,118 @@ export const demoEvidence: Evidence[] = [
     verifiedAt: DEMO_TIMESTAMP,
   },
   {
-    id: "evidence-003",
+    id: "evidence-005",
+    studentId: "demo-student-001",
+    type: "internship",
+    title: "TechNova Labs Software Engineering Internship Evidence",
+    uploadedAt: DEMO_TIMESTAMP,
+    verificationStatus: "verified",
+    verifiedAt: DEMO_TIMESTAMP,
+  },
+  {
+    id: "evidence-006",
+    studentId: "demo-student-001",
+    type: "certificate",
+    title: "Python Programming Fundamentals Certificate",
+    uploadedAt: DEMO_TIMESTAMP,
+    verificationStatus: "verified",
+    verifiedAt: DEMO_TIMESTAMP,
+  },
+  {
+    id: "evidence-007",
+    studentId: "demo-student-002",
+    type: "skill",
+    title: "Python Skill Evidence",
+    uploadedAt: DEMO_TIMESTAMP,
+    verificationStatus: "verified",
+    verifiedAt: DEMO_TIMESTAMP,
+  },
+  {
+    id: "evidence-008",
+    studentId: "demo-student-002",
+    type: "skill",
+    title: "Machine Learning Skill Evidence",
+    uploadedAt: DEMO_TIMESTAMP,
+    verificationStatus: "verified",
+    verifiedAt: DEMO_TIMESTAMP,
+  },
+  {
+    id: "evidence-009",
+    studentId: "demo-student-002",
+    type: "skill",
+    title: "SQL Skill Evidence",
+    uploadedAt: DEMO_TIMESTAMP,
+    verificationStatus: "verified",
+    verifiedAt: DEMO_TIMESTAMP,
+  },
+  {
+    id: "evidence-010",
+    studentId: "demo-student-002",
+    type: "project",
+    title: "Student Performance Predictor Evidence",
+    uploadedAt: DEMO_TIMESTAMP,
+    verificationStatus: "verified",
+    verifiedAt: DEMO_TIMESTAMP,
+  },
+  {
+    id: "evidence-011",
+    studentId: "demo-student-002",
+    type: "internship",
+    title: "DataSphere AI Machine Learning Internship Evidence",
+    uploadedAt: DEMO_TIMESTAMP,
+    verificationStatus: "verified",
+    verifiedAt: DEMO_TIMESTAMP,
+  },
+  {
+    id: "evidence-012",
     studentId: "demo-student-002",
     type: "certificate",
     title: "Machine Learning Foundations Certificate",
+    uploadedAt: DEMO_TIMESTAMP,
+    verificationStatus: "verified",
+    verifiedAt: DEMO_TIMESTAMP,
+  },
+  {
+    id: "evidence-013",
+    studentId: "demo-student-003",
+    type: "skill",
+    title: "Java Skill Evidence",
+    uploadedAt: DEMO_TIMESTAMP,
+    verificationStatus: "verified",
+    verifiedAt: DEMO_TIMESTAMP,
+  },
+  {
+    id: "evidence-014",
+    studentId: "demo-student-003",
+    type: "skill",
+    title: "SQL Skill Evidence",
+    uploadedAt: DEMO_TIMESTAMP,
+    verificationStatus: "verified",
+    verifiedAt: DEMO_TIMESTAMP,
+  },
+  {
+    id: "evidence-015",
+    studentId: "demo-student-003",
+    type: "project",
+    title: "Inventory Management System Evidence",
+    uploadedAt: DEMO_TIMESTAMP,
+    verificationStatus: "verified",
+    verifiedAt: DEMO_TIMESTAMP,
+  },
+  {
+    id: "evidence-016",
+    studentId: "demo-student-001",
+    type: "achievement",
+    title: "Hackathon Finalist Evidence",
+    uploadedAt: DEMO_TIMESTAMP,
+    verificationStatus: "verified",
+    verifiedAt: DEMO_TIMESTAMP,
+  },
+  {
+    id: "evidence-017",
+    studentId: "demo-student-002",
+    type: "achievement",
+    title: "Top 10 Project Presentation Evidence",
     uploadedAt: DEMO_TIMESTAMP,
     verificationStatus: "verified",
     verifiedAt: DEMO_TIMESTAMP,
@@ -346,11 +490,31 @@ export const demoJobRequirements: JobRequirements[] = [
       maximumBacklogs: 1,
     },
     competencies: {
-      technicalSkills: ["Python", "Data Structures and Algorithms"],
+      technicalSkills: [
+        "Python",
+        "Data Structures and Algorithms",
+      ],
       domainSkills: ["Software Development"],
-      preferredQualifications: ["Relevant projects", "Internship experience"],
+      preferredQualifications: [
+        "Relevant projects",
+        "Internship experience",
+      ],
     },
     confirmedByCompany: true,
+  },
+];
+
+export const demoPISConfigurations: PISConfiguration[] = [
+  {
+    jobId: "job-001",
+    parameters: {
+      academicPerformance: 25,
+      technicalSkills: 35,
+      projects: 20,
+      internships: 20,
+    },
+    confirmed: true,
+    updatedAt: DEMO_TIMESTAMP,
   },
 ];
 
@@ -496,7 +660,8 @@ export const demoAssessmentQuestions: AssessmentQuestion[] = [
   {
     id: "question-004",
     assessmentId: "assessment-001",
-    question: "Which technology is commonly used to create user interfaces in the browser?",
+    question:
+      "Which technology is commonly used to create user interfaces in the browser?",
     type: "mcq",
     options: {
       A: "React",

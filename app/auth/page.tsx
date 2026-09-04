@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   signIn,
   signUp,
+  getUserRecord,
 } from "../../lib/services/authService";
 
 import type { UserRole } from "../../types/database";
@@ -47,7 +48,33 @@ export default function AuthPage() {
     setSuccess("");
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  function validatePassword(pass: string): string | null {
+    if (pass.length < 8) {
+      return "Password must be at least 8 characters long.";
+    }
+
+    if (!/[A-Z]/.test(pass)) {
+      return "Password must contain at least one uppercase letter.";
+    }
+
+    if (!/[a-z]/.test(pass)) {
+      return "Password must contain at least one lowercase letter.";
+    }
+
+    if (!/[0-9]/.test(pass)) {
+      return "Password must contain at least one number.";
+    }
+
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(pass)) {
+      return "Password must contain at least one special character.";
+    }
+
+    return null;
+  }
+
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>
+  ) {
     event.preventDefault();
 
     setError("");
@@ -56,7 +83,21 @@ export default function AuthPage() {
 
     try {
       if (mode === "signup") {
-        await signUp(email, password, role, displayName);
+        const passwordError =
+          validatePassword(password);
+
+        if (passwordError) {
+          setError(passwordError);
+          setLoading(false);
+          return;
+        }
+
+        await signUp(
+          email,
+          password,
+          role,
+          displayName
+        );
 
         setSuccess("Account created successfully.");
 
@@ -69,11 +110,29 @@ export default function AuthPage() {
           setSuccess("");
         }, 1200);
       } else {
-        await signIn(email, password);
+        const credential = await signIn(
+          email,
+          password
+        );
 
         setSuccess("Signed in successfully.");
 
+        const userRecord =
+          await getUserRecord(
+            credential.user.uid
+          );
+
         setTimeout(() => {
+          if (userRecord?.role === "placement") {
+            router.push("/placement");
+            return;
+          }
+
+          if (userRecord?.role === "company") {
+            router.push("/recruiter/pis");
+            return;
+          }
+
           router.push("/");
         }, 700);
       }
@@ -90,10 +149,10 @@ export default function AuthPage() {
   }
 
   return (
-    <main className="min-h-screen bg-black text-white flex items-center justify-center px-6 py-12">
+    <main className="flex min-h-screen items-center justify-center bg-black px-6 py-12 text-white">
       <div className="w-full max-w-md">
         <div className="mb-10 text-center">
-          <p className="text-sm font-medium tracking-[0.3em] uppercase text-gray-400">
+          <p className="text-sm font-medium uppercase tracking-[0.3em] text-gray-400">
             PLACEKARO
           </p>
 
@@ -102,7 +161,8 @@ export default function AuthPage() {
           </h1>
 
           <p className="mt-3 text-sm text-gray-400">
-            Build your employability profile. Connect with opportunities.
+            Build your employability profile. Connect with
+            opportunities.
           </p>
         </div>
 
@@ -147,7 +207,10 @@ export default function AuthPage() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-4"
+          >
             {mode === "signup" && (
               <>
                 <div>
@@ -163,7 +226,9 @@ export default function AuthPage() {
                     type="text"
                     value={displayName}
                     onChange={(event) =>
-                      setDisplayName(event.target.value)
+                      setDisplayName(
+                        event.target.value
+                      )
                     }
                     placeholder="Enter your name"
                     required
@@ -183,7 +248,9 @@ export default function AuthPage() {
                     id="role"
                     value={role}
                     onChange={(event) =>
-                      setRole(event.target.value as UserRole)
+                      setRole(
+                        event.target.value as UserRole
+                      )
                     }
                     className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-sm outline-none focus:border-white/30"
                   >
@@ -212,7 +279,9 @@ export default function AuthPage() {
                 id="email"
                 type="email"
                 value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                onChange={(event) =>
+                  setEmail(event.target.value)
+                }
                 placeholder="you@example.com"
                 required
                 className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-sm outline-none transition placeholder:text-gray-600 focus:border-white/30"
