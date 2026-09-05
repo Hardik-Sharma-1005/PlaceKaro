@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { RoleGuard } from "../../../lib/components/RoleGuard";
 import {
   calculatePIS,
 } from "../../../lib/pis/engine";
@@ -503,7 +505,7 @@ function getEvidenceCoverage(
   };
 }
 
-export default function RecruiterPISPage() {
+function RecruiterPISContent() {
   const [weights, setWeights] = useState<
     Record<PISParameter, number>
   >(createDefaultWeights);
@@ -802,6 +804,13 @@ export default function RecruiterPISPage() {
     <main className="min-h-screen bg-slate-50 px-6 py-10">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8">
+          <Link
+            href="/recruiter"
+            className="mb-4 inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition"
+          >
+            ← Back to Recruiter Dashboard
+          </Link>
+
           <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-blue-600">
             Recruiter PIS
           </p>
@@ -1676,5 +1685,13 @@ export default function RecruiterPISPage() {
         </section>
       </div>
     </main>
+  );
+}
+
+export default function RecruiterPISPage() {
+  return (
+    <RoleGuard allowedRoles={["company"]}>
+      <RecruiterPISContent />
+    </RoleGuard>
   );
 }

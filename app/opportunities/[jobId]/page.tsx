@@ -12,6 +12,7 @@ import {
 } from "firebase/database";
 
 import { RoleGuard } from "../../../lib/components/RoleGuard";
+import { StudentSidebar } from "../../../lib/components/StudentSidebar";
 import { useAuth } from "../../../lib/context/AuthContext";
 import { database } from "../../../lib/firebase/database";
 
@@ -58,7 +59,12 @@ function OpportunityDetailsContent({
         ]);
 
         const jobs = jobsSnapshot.exists()
-          ? (Object.values(jobsSnapshot.val()) as Job[])
+          ? Object.entries(
+              jobsSnapshot.val() as Record<string, Job>
+            ).map(([key, val]) => ({
+              ...val,
+              id: val.id || key,
+            }))
           : [];
 
         const selectedJob = jobs.find((item) => item.id === jobId);
@@ -71,9 +77,12 @@ function OpportunityDetailsContent({
         }
 
         const applications = applicationsSnapshot.exists()
-          ? (Object.values(
-              applicationsSnapshot.val()
-            ) as Application[])
+          ? Object.entries(
+              applicationsSnapshot.val() as Record<string, Application>
+            ).map(([key, val]) => ({
+              ...val,
+              id: val.id || key,
+            }))
           : [];
 
         const selectedApplication =
@@ -287,7 +296,10 @@ export default function OpportunityDetailsPage() {
   return (
     <RoleGuard allowedRoles={["student"]}>
       <div className="min-h-screen bg-slate-50 text-slate-900">
-        <header className="border-b border-slate-200 bg-white">
+        <div className="flex min-h-screen">
+          <StudentSidebar />
+          <div className="min-w-0 flex-1">
+            <header className="border-b border-slate-200 bg-white">
           <div className="mx-auto flex min-h-20 w-full max-w-6xl items-center justify-between px-5 sm:px-8">
             <div>
               <p className="text-xl font-bold tracking-tight text-slate-950">
@@ -314,7 +326,9 @@ export default function OpportunityDetailsPage() {
           </p>
 
           <OpportunityDetailsContent jobId={jobId} />
-        </main>
+            </main>
+          </div>
+        </div>
       </div>
     </RoleGuard>
   );

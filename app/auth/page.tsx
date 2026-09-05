@@ -129,7 +129,7 @@ export default function AuthPage() {
           }
 
           if (userRecord?.role === "company") {
-            router.push("/recruiter/pis");
+            router.push("/recruiter");
             return;
           }
 

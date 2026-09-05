@@ -14,9 +14,9 @@ function RecruiterDashboardContent() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 justify-between items-center">
             <div className="flex items-center">
-              <p className="text-sm font-bold tracking-widest text-slate-900">
+              <Link href="/" className="text-sm font-bold tracking-widest text-slate-900 hover:text-slate-700 transition">
                 PLACEKARO <span className="text-slate-400 font-normal ml-2">| Recruiter</span>
-              </p>
+              </Link>
             </div>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
@@ -68,7 +68,7 @@ function RecruiterDashboardContent() {
             </div>
             <div className="mt-6">
               <Link
-                href="/recruiter/search"
+                href="/recruiter/pis"
                 className="flex justify-center w-full rounded-md bg-slate-900 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
               >
                 Search Candidates

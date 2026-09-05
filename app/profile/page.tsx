@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "../../lib/context/AuthContext";
 import { RoleGuard } from "../../lib/components/RoleGuard";
+import { StudentSidebar } from "../../lib/components/StudentSidebar";
 import { getData, updateData } from "../../lib/realtime/database";
 import type {
   Achievement,
@@ -346,8 +347,11 @@ function ProfileContent() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      {/* Header */}
-      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-xs">
+      <div className="flex min-h-screen">
+        <StudentSidebar />
+        <div className="min-w-0 flex-1">
+          {/* Header */}
+          <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-xs">
         <div className="mx-auto flex min-h-20 w-full max-w-6xl items-center justify-between px-5 sm:px-8">
           <Link href="/" className="group flex flex-col">
             <span className="text-xl font-bold tracking-tight text-slate-950 transition group-hover:text-slate-700">
@@ -715,7 +719,9 @@ function ProfileContent() {
             }}
           />
         )}
-      </main>
+          </main>
+        </div>
+      </div>
     </div>
   );
 }

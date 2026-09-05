@@ -11,6 +11,7 @@ import {
 } from "firebase/database";
 
 import { RoleGuard } from "../../lib/components/RoleGuard";
+import { StudentSidebar } from "../../lib/components/StudentSidebar";
 import { useAuth } from "../../lib/context/AuthContext";
 import { database } from "../../lib/firebase/database";
 
@@ -57,13 +58,21 @@ function OpportunitiesContent() {
         ]);
 
         const jobs = jobsSnapshot.exists()
-          ? (Object.values(jobsSnapshot.val()) as Job[])
+          ? Object.entries(
+              jobsSnapshot.val() as Record<string, Job>
+            ).map(([key, val]) => ({
+              ...val,
+              id: val.id || key,
+            }))
           : [];
 
         const applications = applicationsSnapshot.exists()
-          ? (Object.values(
-              applicationsSnapshot.val()
-            ) as Application[])
+          ? Object.entries(
+              applicationsSnapshot.val() as Record<string, Application>
+            ).map(([key, val]) => ({
+              ...val,
+              id: val.id || key,
+            }))
           : [];
 
         const applicationByJobId = new Map(
@@ -94,7 +103,10 @@ function OpportunitiesContent() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="border-b border-slate-200 bg-white">
+      <div className="flex min-h-screen">
+        <StudentSidebar />
+        <div className="min-w-0 flex-1">
+          <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex min-h-20 w-full max-w-6xl items-center justify-between px-5 sm:px-8">
           <div>
             <p className="text-xl font-bold tracking-tight text-slate-950">
@@ -170,9 +182,9 @@ function OpportunitiesContent() {
           </section>
         ) : (
           <section className="mt-8 space-y-5">
-            {opportunities.map(({ job, application }) => (
+            {opportunities.map(({ job, application }, index) => (
               <article
-                key={job.id}
+                key={`${job.id || job.title || "opportunity"}-${index}`}
                 className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-slate-300 hover:shadow-md sm:p-7"
               >
                 <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
@@ -299,20 +311,20 @@ function OpportunitiesContent() {
                     )}
                   </div>
 
-                  <button
-                    type="button"
-                    disabled
-                    className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white opacity-60"
-                    title="Opportunity details will be added in the next step."
+                  <Link
+                    href={`/opportunities/${job.id}`}
+                    className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
                   >
                     View details
-                  </button>
+                  </Link>
                 </div>
               </article>
             ))}
           </section>
         )}
-      </main>
+          </main>
+        </div>
+      </div>
     </div>
   );
 }

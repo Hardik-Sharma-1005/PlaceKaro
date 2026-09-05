@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useAuth } from "../lib/context/AuthContext";
+import { StudentSidebar } from "../lib/components/StudentSidebar";
 import {
   get,
   orderByChild,
@@ -700,9 +700,12 @@ function StudentDashboard() {
 
         const jobs = snapshot.val() as Record<string, Job>;
 
-        const jobsList = Object.values(jobs).sort(
-          (a, b) => b.createdAt - a.createdAt
-        );
+        const jobsList = Object.entries(jobs)
+          .map(([key, value]) => ({
+            ...value,
+            id: value.id || key,
+          }))
+          .sort((a, b) => b.createdAt - a.createdAt);
 
         setActiveOpportunities(jobsList.length);
         setPublishedJobs(jobsList);
@@ -775,7 +778,11 @@ function StudentDashboard() {
           StudentNotification
         >;
 
-        const notificationsList = Object.values(notifications)
+        const notificationsList = Object.entries(notifications)
+          .map(([key, value]) => ({
+            ...value,
+            id: value.id || key,
+          }))
           .sort((a, b) => b.createdAt - a.createdAt)
           .slice(0, 3);
 
@@ -792,82 +799,7 @@ function StudentDashboard() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <div className="flex min-h-screen">
-        <aside className="hidden w-64 flex-col border-r border-slate-200 bg-white lg:flex">
-          <div className="flex h-20 items-center border-b border-slate-200 px-6">
-            <div>
-              <div className="text-xl font-bold tracking-tight text-slate-950">
-                PlaceKaro
-              </div>
-
-              <div className="text-xs text-slate-500">
-                Placement Intelligence
-              </div>
-            </div>
-          </div>
-
-          <nav className="flex-1 px-4 py-6">
-            <div className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Workspace
-            </div>
-
-            <div className="space-y-1">
-              <button className="flex w-full items-center gap-3 rounded-xl bg-slate-900 px-3 py-3 text-left text-sm font-medium text-white">
-                <span className="h-2 w-2 rounded-full bg-white" />
-                Dashboard
-              </button>
-
-              <Link
-                href="/profile"
-                className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-slate-100"
-              >
-                <span className="h-2 w-2 rounded-full bg-slate-300" />
-                My Profile
-              </Link>
-
-              <Link
-                href="/opportunities"
-                className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-slate-100"
-              >
-                <span className="h-2 w-2 rounded-full bg-slate-300" />
-                Opportunities
-              </Link>
-
-              <button className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-slate-100">
-                <span className="h-2 w-2 rounded-full bg-slate-300" />
-                Assessments
-              </button>
-
-              <button className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-slate-100">
-                <span className="h-2 w-2 rounded-full bg-slate-300" />
-                Activity
-              </button>
-            </div>
-          </nav>
-
-          <div className="border-t border-slate-200 p-4">
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                Profile
-              </p>
-
-              <p className="mt-2 text-sm font-semibold text-slate-900">
-                Keep your evidence updated
-              </p>
-
-              <p className="mt-1 text-xs leading-5 text-slate-500">
-                A stronger verified profile helps you become more discoverable.
-              </p>
-
-              <Link
-                href="/profile"
-                className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-slate-900 hover:underline"
-              >
-                <span>Edit Portfolio & Evidence</span>
-                <span>→</span>
-              </Link>
-            </div>
-          </div>
-        </aside>
+        <StudentSidebar />
 
         <main className="min-w-0 flex-1">
           <header className="border-b border-slate-200 bg-white px-5 sm:px-8">
@@ -894,6 +826,17 @@ function StudentDashboard() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">
                   {(user?.displayName?.charAt(0) ?? "S").toUpperCase()}
                 </div>
+
+                <button
+                  onClick={async () => {
+                    const { signOutUser } = await import("../lib/services/authService");
+                    await signOutUser();
+                    window.location.href = "/auth";
+                  }}
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition"
+                >
+                  Log out
+                </button>
               </div>
             </div>
 
@@ -1155,9 +1098,9 @@ function StudentDashboard() {
                       </p>
                     </div>
                   ) : (
-                    publishedJobs.slice(0, 3).map((job) => (
+                    publishedJobs.slice(0, 3).map((job, index) => (
                       <Link
-                        key={job.id}
+                        key={job.id || `published-job-${index}`}
                         href={`/opportunities/${job.id}`}
                         className="block rounded-xl border border-slate-200 p-4 transition hover:border-slate-300 hover:bg-slate-50"
                       >
@@ -1219,9 +1162,9 @@ function StudentDashboard() {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {recentNotifications.map((notification) => (
+                      {recentNotifications.map((notification, index) => (
                         <div
-                          key={notification.id}
+                          key={notification.id || `notification-${index}`}
                           className="flex gap-3"
                         >
                           <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-slate-900" />
@@ -1259,21 +1202,6 @@ function StudentDashboard() {
 
 export default function Home() {
   const { user, loading } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (loading || !user) return;
-
-    if (user.role === "company") {
-      router.replace("/recruiter");
-      return;
-    }
-
-    if (user.role === "placement") {
-      router.replace("/placement");
-      return;
-    }
-  }, [user, loading, router]);
 
   if (loading) {
     return (
@@ -1286,19 +1214,8 @@ export default function Home() {
     );
   }
 
-  if (!user) {
-    return <PublicLandingPage />;
-  }
-
-  if (user.role === "company" || user.role === "placement") {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#090909]">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-white/20 border-t-[#F5B900]" />
-          <p className="text-sm text-slate-300">Redirecting...</p>
-        </div>
-      </div>
-    );
+  if (user?.role === "student") {
+    return <StudentDashboard />;
   }
 
   return <PublicLandingPage />;
