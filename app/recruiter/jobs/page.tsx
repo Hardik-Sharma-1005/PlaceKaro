@@ -4,23 +4,37 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "../../../lib/context/AuthContext";
 import { RoleGuard } from "../../../lib/components/RoleGuard";
-import { jobService } from "../../../lib/services/jobService";
 import { Job } from "../../../types/database";
 
 function JobsDashboardContent() {
-  const { user } = useAuth();
+  const { user, firebaseUser } = useAuth();
   
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadJobs() {
-      if (!user || user.role !== "company") return;
+      if (!user || !firebaseUser || user.role !== "company") return;
       
       try {
-        // For MVP, user.uid represents the companyId since we don't have separate company accounts fully wired up
-        const companyJobs = await jobService.getJobsByCompany(user.uid);
-        setJobs(companyJobs);
+        const idToken = await firebaseUser.getIdToken();
+
+        const response = await fetch("/api/recruiter/jobs", {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+          cache: "no-store",
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.error || "Unable to load jobs."
+          );
+        }
+
+        setJobs(data.jobs);
       } catch (error) {
         console.error("Failed to load jobs", error);
       } finally {
@@ -29,7 +43,7 @@ function JobsDashboardContent() {
     }
     
     loadJobs();
-  }, [user]);
+  }, [user, firebaseUser]);
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">

@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
+import { useAuth } from "../../../../lib/context/AuthContext";
 import { RoleGuard } from "../../../../lib/components/RoleGuard";
-import { jobService } from "../../../../lib/services/jobService";
 import { calculatePIS } from "../../../../lib/pis/engine";
 
 import type {
@@ -33,6 +33,8 @@ function JobDetailsContent() {
   const params = useParams();
   const router = useRouter();
 
+  const { user, firebaseUser } = useAuth();
+
   const jobId = params.id as string;
 
   const [job, setJob] = useState<Job | null>(null);
@@ -56,27 +58,44 @@ function JobDetailsContent() {
     let cancelled = false;
 
     async function loadJobData(): Promise<void> {
+      if (!firebaseUser) return;
+
       try {
         setLoading(true);
         setJobError(null);
 
-        const [fetchedJob, fetchedRequirements] =
-          await Promise.all([
-            jobService.getJobById(jobId),
-            jobService.getJobRequirements(jobId),
-          ]);
+        const idToken = await firebaseUser.getIdToken();
+        const jobPath = `/api/recruiter/jobs/${encodeURIComponent(jobId)}`;
+
+        const response = await fetch(jobPath, {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+          cache: "no-store",
+        });
 
         if (cancelled) {
           return;
         }
 
-        if (!fetchedJob) {
+        if (!response.ok) {
+          if (response.status === 404 || response.status === 403) {
+            router.push("/recruiter/jobs");
+            return;
+          }
+          const data = await response.json();
+          throw new Error(data.error || "Failed to load job details.");
+        }
+
+        const data = await response.json();
+
+        if (!data.job) {
           router.push("/recruiter/jobs");
           return;
         }
 
-        setJob(fetchedJob);
-        setRequirements(fetchedRequirements);
+        setJob(data.job);
+        setRequirements(data.requirements);
       } catch (error) {
         if (cancelled) {
           return;
@@ -99,7 +118,7 @@ function JobDetailsContent() {
     return () => {
       cancelled = true;
     };
-  }, [jobId, router]);
+  }, [jobId, router, firebaseUser]);
 
   async function loadPIS(): Promise<void> {
     try {
@@ -109,11 +128,17 @@ function JobDetailsContent() {
         loading: true,
       });
 
+      if (!firebaseUser) return;
+      const idToken = await firebaseUser.getIdToken();
+
       const response = await fetch(
         `/api/recruiter/pis?jobId=${encodeURIComponent(
           jobId
         )}`,
         {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
           cache: "no-store",
         }
       );
@@ -180,17 +205,31 @@ function JobDetailsContent() {
   ]);
 
   async function handleRequestApproval(): Promise<void> {
-    if (!job) {
+    if (!job || !firebaseUser) {
       return;
     }
 
     try {
-      await jobService.requestJobApproval(job.id);
+      const idToken = await firebaseUser.getIdToken();
+      const response = await fetch(
+        `/api/recruiter/jobs/${encodeURIComponent(job.id)}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        }
+      );
 
-      setJob({
-        ...job,
-        status: "pending_approval",
-      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || "Unable to request approval."
+        );
+      }
+
+      setJob(data.job);
     } catch (error) {
       setJobError(
         error instanceof Error

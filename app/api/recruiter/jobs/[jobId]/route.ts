@@ -1,31 +1,29 @@
 import { NextResponse } from "next/server";
 
-import {
-  buildServerPISInput,
-  calculatePISFromAdminFirebase,
-} from "../../../../lib/pis/serverService";
-
-import { adminDatabase } from "../../../../lib/seed/firebaseAdmin";
+import { adminDatabase } from "../../../../../lib/seed/firebaseAdmin";
 
 import {
   authenticateRecruiter,
   RecruiterAuthError,
-} from "../../../../lib/auth/authenticateRecruiter";
+} from "../../../../../lib/auth/authenticateRecruiter";
 
 import type {
   Job,
+  JobRequirements,
   PISConfiguration,
-} from "../../../../types/database";
+} from "../../../../../types/database";
 
 import type {
   PISParameter,
-} from "../../../../lib/pis/types";
+} from "../../../../../lib/pis/types";
 
-const DEMO_STUDENT_IDS = [
-  "demo-student-001",
-  "demo-student-002",
-  "demo-student-003",
-];
+interface RouteContext {
+  params: Promise<{
+    jobId: string;
+  }>;
+}
+
+// --- PIS parameter validation ---
 
 const ALLOWED_PARAMETERS: PISParameter[] = [
   "academicPerformance",
@@ -42,7 +40,7 @@ const ALLOWED_PARAMETERS: PISParameter[] = [
   "preferredQualifications",
 ];
 
-function validateParameters(
+function validatePISParameters(
   parameters: unknown
 ): parameters is Partial<Record<PISParameter, number>> {
   if (
@@ -89,14 +87,8 @@ function validateParameters(
   return Math.abs(total - 100) < 0.0001;
 }
 
-/**
- * Verifies that the specified job exists and belongs to
- * the authenticated recruiter (both companyId and
- * recruiterId must match).
- *
- * Returns the Job record on success, or a NextResponse
- * error on failure.
- */
+// --- Job ownership authorization ---
+
 async function authorizeJobAccess(
   jobId: string,
   companyId: string,
@@ -131,25 +123,21 @@ async function authorizeJobAccess(
   return job;
 }
 
-export async function GET(
-  request: Request
+// --- PUT: update requirements or PIS configuration ---
+
+export async function PUT(
+  request: Request,
+  context: RouteContext
 ) {
   try {
     const identity =
       await authenticateRecruiter(request);
 
-    const { searchParams } =
-      new URL(request.url);
-
-    const jobId =
-      searchParams.get("jobId");
+    const { jobId } = await context.params;
 
     if (!jobId) {
       return NextResponse.json(
-        {
-          error:
-            "jobId query parameter is required.",
-        },
+        { error: "jobId is required." },
         { status: 400 }
       );
     }
@@ -164,191 +152,72 @@ export async function GET(
       return jobResult;
     }
 
-    const inputs = await Promise.all(
-      DEMO_STUDENT_IDS.map((studentId) =>
-        buildServerPISInput(
-          studentId,
-          jobId
-        )
-      )
-    );
-
-    return NextResponse.json({
-      inputs,
-    });
-  } catch (error) {
-    console.error(
-      "Recruiter PIS GET error:",
-      error
-    );
-
-    if (error instanceof RecruiterAuthError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 401 }
-      );
-    }
-
-    return NextResponse.json(
-      {
-        error:
-          "Unable to load recruiter PIS data.",
-      },
-      { status: 500 }
-    );
-  }
-}
-
-export async function POST(
-  request: Request
-) {
-  try {
-    const identity =
-      await authenticateRecruiter(request);
-
     const body = (await request.json()) as {
-      studentId?: unknown;
-      jobId?: unknown;
-    };
-
-    const studentId = body.studentId;
-    const jobId = body.jobId;
-
-    if (
-      typeof studentId !== "string" ||
-      studentId.trim().length === 0
-    ) {
-      return NextResponse.json(
-        {
-          error:
-            "studentId is required.",
-        },
-        { status: 400 }
-      );
-    }
-
-    if (
-      typeof jobId !== "string" ||
-      jobId.trim().length === 0
-    ) {
-      return NextResponse.json(
-        {
-          error:
-            "jobId is required.",
-        },
-        { status: 400 }
-      );
-    }
-
-    const jobResult = await authorizeJobAccess(
-      jobId,
-      identity.companyId,
-      identity.recruiterId
-    );
-
-    if (jobResult instanceof NextResponse) {
-      return jobResult;
-    }
-
-    const appsSnapshot = await adminDatabase
-      .ref("applications")
-      .orderByChild("jobId")
-      .equalTo(jobId)
-      .get();
-
-    let isAssociated = false;
-
-    if (appsSnapshot.exists()) {
-      appsSnapshot.forEach((child) => {
-        if (child.val().studentId === studentId) {
-          isAssociated = true;
-          return true; // cancel enumeration
-        }
-      });
-    }
-
-    if (!isAssociated) {
-      return NextResponse.json(
-        {
-          error:
-            "This student is not associated with this job.",
-        },
-        { status: 403 }
-      );
-    }
-
-    const result =
-      await calculatePISFromAdminFirebase(
-        studentId,
-        jobId
-      );
-
-    return NextResponse.json({
-      result,
-    });
-  } catch (error) {
-    console.error(
-      "Recruiter PIS POST error:",
-      error
-    );
-
-    if (error instanceof RecruiterAuthError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 401 }
-      );
-    }
-
-    return NextResponse.json(
-      {
-        error:
-          "Unable to calculate recruiter PIS.",
-      },
-      { status: 500 }
-    );
-  }
-}
-
-export async function PUT(
-  request: Request
-) {
-  try {
-    const identity =
-      await authenticateRecruiter(request);
-
-    const body = (await request.json()) as {
-      jobId?: unknown;
+      operation?: unknown;
+      requirements?: unknown;
       parameters?: unknown;
     };
 
-    const jobId = body.jobId;
+    const operation = body.operation;
 
     if (
-      typeof jobId !== "string" ||
-      jobId.trim().length === 0
+      operation !== "requirements" &&
+      operation !== "pis"
     ) {
       return NextResponse.json(
         {
           error:
-            "jobId is required.",
+            "operation must be \"requirements\" or \"pis\".",
         },
         { status: 400 }
       );
     }
 
-    const jobResult = await authorizeJobAccess(
-      jobId,
-      identity.companyId,
-      identity.recruiterId
-    );
+    // --- Requirements operation ---
 
-    if (jobResult instanceof NextResponse) {
-      return jobResult;
+    if (operation === "requirements") {
+      const requirements = body.requirements;
+
+      if (
+        !requirements ||
+        typeof requirements !== "object" ||
+        Array.isArray(requirements)
+      ) {
+        return NextResponse.json(
+          {
+            error:
+              "requirements must be an object.",
+          },
+          { status: 400 }
+        );
+      }
+
+      const typed =
+        requirements as Omit<JobRequirements, "jobId">;
+
+      const jobRequirements: JobRequirements = {
+        jobId,
+        hardEligibility:
+          typed.hardEligibility ?? {},
+        competencies:
+          typed.competencies ?? {},
+        confirmedByCompany:
+          typed.confirmedByCompany ?? false,
+      };
+
+      await adminDatabase
+        .ref(`jobRequirements/${jobId}`)
+        .set(jobRequirements);
+
+      return NextResponse.json({
+        success: true,
+        requirements: jobRequirements,
+      });
     }
 
-    if (
-      !validateParameters(body.parameters)
-    ) {
+    // --- PIS operation ---
+
+    if (!validatePISParameters(body.parameters)) {
       return NextResponse.json(
         {
           error:
@@ -360,8 +229,7 @@ export async function PUT(
 
     const configuration: PISConfiguration = {
       jobId,
-      parameters:
-        body.parameters,
+      parameters: body.parameters,
       confirmed: true,
       updatedAt: Date.now(),
     };
@@ -376,7 +244,7 @@ export async function PUT(
     });
   } catch (error) {
     console.error(
-      "Recruiter PIS PUT error:",
+      "Recruiter job PUT error:",
       error
     );
 
@@ -390,7 +258,147 @@ export async function PUT(
     return NextResponse.json(
       {
         error:
-          "Unable to save PIS configuration.",
+          "Unable to update job configuration.",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// --- POST: request job approval ---
+
+export async function POST(
+  request: Request,
+  context: RouteContext
+) {
+  try {
+    const identity =
+      await authenticateRecruiter(request);
+
+    const { jobId } = await context.params;
+
+    if (!jobId) {
+      return NextResponse.json(
+        { error: "jobId is required." },
+        { status: 400 }
+      );
+    }
+
+    const jobResult = await authorizeJobAccess(
+      jobId,
+      identity.companyId,
+      identity.recruiterId
+    );
+
+    if (jobResult instanceof NextResponse) {
+      return jobResult;
+    }
+
+    const job = jobResult;
+
+    const now = Date.now();
+
+    await adminDatabase
+      .ref(`jobs/${jobId}`)
+      .update({
+        status: "pending_approval",
+        updatedAt: now,
+      });
+
+    return NextResponse.json({
+      success: true,
+      job: {
+        ...job,
+        id: jobId,
+        status: "pending_approval",
+        updatedAt: now,
+      },
+    });
+  } catch (error) {
+    console.error(
+      "Recruiter job POST error:",
+      error
+    );
+
+    if (error instanceof RecruiterAuthError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 401 }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        error:
+          "Unable to submit job for approval.",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// --- GET: load job details and requirements ---
+
+export async function GET(
+  request: Request,
+  context: RouteContext
+) {
+  try {
+    const identity =
+      await authenticateRecruiter(request);
+
+    const { jobId } = await context.params;
+
+    if (!jobId) {
+      return NextResponse.json(
+        { error: "jobId is required." },
+        { status: 400 }
+      );
+    }
+
+    const jobResult = await authorizeJobAccess(
+      jobId,
+      identity.companyId,
+      identity.recruiterId
+    );
+
+    if (jobResult instanceof NextResponse) {
+      return jobResult;
+    }
+
+    const job = jobResult;
+
+    const reqSnapshot = await adminDatabase
+      .ref(`jobRequirements/${jobId}`)
+      .get();
+
+    const requirements = reqSnapshot.exists()
+      ? (reqSnapshot.val() as JobRequirements)
+      : null;
+
+    return NextResponse.json({
+      job: {
+        ...job,
+        id: jobId,
+      },
+      requirements,
+    });
+  } catch (error) {
+    console.error(
+      "Recruiter job GET error:",
+      error
+    );
+
+    if (error instanceof RecruiterAuthError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 401 }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        error: "Unable to load job details.",
       },
       { status: 500 }
     );

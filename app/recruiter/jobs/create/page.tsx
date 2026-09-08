@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "../../../../lib/context/AuthContext";
 import { RoleGuard } from "../../../../lib/components/RoleGuard";
-import { jobService } from "../../../../lib/services/jobService";
+
 import type {
   AssessmentAccessModel,
   PISConfiguration,
@@ -90,7 +90,7 @@ const createEmptyWeights = (): PISConfiguration["parameters"] => ({
 });
 
 function JobCreationWizard() {
-  const { user } = useAuth();
+  const { user, firebaseUser } = useAuth();
   const router = useRouter();
 
   const [step, setStep] = useState(1);
@@ -157,7 +157,7 @@ function JobCreationWizard() {
     graduationYears.length > 0;
 
   const handlePublish = async () => {
-    if (!user) {
+    if (!user || !firebaseUser) {
       return;
     }
 
@@ -179,37 +179,104 @@ function JobCreationWizard() {
     setIsSubmitting(true);
 
     try {
-      const jobId = await jobService.createJob({
-        companyId: user.uid,
-        recruiterId: user.uid,
-        title: title.trim(),
-        description: description.trim(),
-        status: "draft",
-        assessmentAccessModel: accessModel,
-      });
+      const idToken = await firebaseUser.getIdToken();
 
-      await jobService.updateJobRequirements(jobId, {
-        hardEligibility: {
-          branches: selectedBranches,
-          graduationYears: graduationYears
-            .map((year) => Number.parseInt(year, 10))
-            .filter((year) => Number.isInteger(year)),
-          minimumCGPA: Number.parseFloat(minCgpa),
-          maximumBacklogs: Number.parseInt(maxBacklogs, 10),
+      const response = await fetch("/api/recruiter/jobs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
         },
-        competencies: {},
-        confirmedByCompany: true,
+        body: JSON.stringify({
+          title: title.trim(),
+          description: description.trim(),
+          assessmentAccessModel: accessModel,
+        }),
       });
 
-      await jobService.updateJobPISConfig(jobId, weights);
+      const data = await response.json();
 
-      await jobService.requestJobApproval(jobId);
+      if (!response.ok) {
+        throw new Error(
+          data.error || "Unable to create the job."
+        );
+      }
+
+      const jobId: string = data.job.id;
+
+      const jobPath = `/api/recruiter/jobs/${encodeURIComponent(jobId)}`;
+
+      const requirementsResponse = await fetch(jobPath, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          operation: "requirements",
+          requirements: {
+            hardEligibility: {
+              branches: selectedBranches,
+              graduationYears: graduationYears
+                .map((year) => Number.parseInt(year, 10))
+                .filter((year) => Number.isInteger(year)),
+              minimumCGPA: Number.parseFloat(minCgpa),
+              maximumBacklogs: Number.parseInt(maxBacklogs, 10),
+            },
+            competencies: {},
+            confirmedByCompany: true,
+          },
+        }),
+      });
+
+      if (!requirementsResponse.ok) {
+        const reqData = await requirementsResponse.json();
+        throw new Error(
+          reqData.error || "Unable to save job requirements."
+        );
+      }
+
+      const pisResponse = await fetch(jobPath, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          operation: "pis",
+          parameters: weights,
+        }),
+      });
+
+      if (!pisResponse.ok) {
+        const pisData = await pisResponse.json();
+        throw new Error(
+          pisData.error || "Unable to save PIS configuration."
+        );
+      }
+
+      const approvalResponse = await fetch(jobPath, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+
+      if (!approvalResponse.ok) {
+        const approvalData = await approvalResponse.json();
+        throw new Error(
+          approvalData.error || "Unable to submit job for approval."
+        );
+      }
 
       router.push("/recruiter/jobs");
     } catch (error) {
       console.error("Failed to create job:", error);
       alert(
-        "The job could not be submitted for approval. Please try again."
+        error instanceof Error
+          ? error.message
+          : "The job could not be submitted for approval. Please try again."
       );
       setIsSubmitting(false);
     }
