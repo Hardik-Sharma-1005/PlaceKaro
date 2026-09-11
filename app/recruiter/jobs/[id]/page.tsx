@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -110,9 +111,7 @@ function JobDetailsContent() {
       });
 
       const response = await fetch(
-        `/api/recruiter/pis?jobId=${encodeURIComponent(
-          jobId
-        )}`,
+        `/api/recruiter/pis?jobId=${encodeURIComponent(jobId)}`,
         {
           cache: "no-store",
         }
@@ -157,28 +156,6 @@ function JobDetailsContent() {
     }
   }
 
-  useEffect(() => {
-    if (activeTab !== "pis") {
-      return;
-    }
-
-    if (
-      pisState.results.length > 0 ||
-      pisState.loading ||
-      pisState.error
-    ) {
-      return;
-    }
-
-    void loadPIS();
-  }, [
-    activeTab,
-    jobId,
-    pisState.results.length,
-    pisState.loading,
-    pisState.error,
-  ]);
-
   async function handleRequestApproval(): Promise<void> {
     if (!job) {
       return;
@@ -197,6 +174,18 @@ function JobDetailsContent() {
           ? error.message
           : "Unable to request approval."
       );
+    }
+  }
+
+  function handlePISClick(): void {
+    setActiveTab("pis");
+
+    if (
+      pisState.results.length === 0 &&
+      !pisState.loading &&
+      !pisState.error
+    ) {
+      void loadPIS();
     }
   }
 
@@ -321,9 +310,7 @@ function JobDetailsContent() {
           <nav className="-mb-px flex gap-8 overflow-x-auto">
             <button
               type="button"
-              onClick={() =>
-                setActiveTab("overview")
-              }
+              onClick={() => setActiveTab("overview")}
               className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${
                 activeTab === "overview"
                   ? "border-slate-900 text-slate-900"
@@ -335,9 +322,7 @@ function JobDetailsContent() {
 
             <button
               type="button"
-              onClick={() =>
-                setActiveTab("pis")
-              }
+              onClick={handlePISClick}
               className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${
                 activeTab === "pis"
                   ? "border-slate-900 text-slate-900"
@@ -349,9 +334,7 @@ function JobDetailsContent() {
 
             <button
               type="button"
-              onClick={() =>
-                setActiveTab("applicants")
-              }
+              onClick={() => setActiveTab("applicants")}
               className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${
                 activeTab === "applicants"
                   ? "border-slate-900 text-slate-900"
@@ -389,8 +372,12 @@ function JobDetailsContent() {
                       </p>
 
                       <p className="mt-1 text-lg font-semibold text-slate-900">
-                        {requirements.hardEligibility
-                          .minimumCGPA ?? "N/A"}
+                        {requirements.hardEligibility.minimumCGPA !==
+                          undefined &&
+                        requirements.hardEligibility.minimumCGPA !==
+                          null
+                          ? `≥ ${requirements.hardEligibility.minimumCGPA}`
+                          : "No minimum required"}
                       </p>
                     </div>
 
@@ -400,26 +387,60 @@ function JobDetailsContent() {
                       </p>
 
                       <p className="mt-1 text-lg font-semibold text-slate-900">
-                        {requirements.hardEligibility
-                          .maximumBacklogs ?? "N/A"}
+                        {requirements.hardEligibility.maximumBacklogs !==
+                          undefined &&
+                        requirements.hardEligibility.maximumBacklogs !==
+                          null
+                          ? requirements.hardEligibility
+                              .maximumBacklogs === 0
+                            ? "0 (No active backlogs)"
+                            : `Max ${requirements.hardEligibility.maximumBacklogs}`
+                          : "No restriction"}
                       </p>
                     </div>
 
-                    <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 sm:col-span-2">
+                    <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
+                      <p className="text-xs font-medium text-slate-500">
+                        Graduation Batches
+                      </p>
+
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {requirements.hardEligibility
+                          .graduationYears &&
+                        requirements.hardEligibility.graduationYears
+                          .length > 0 ? (
+                          requirements.hardEligibility.graduationYears.map(
+                            (year) => (
+                              <span
+                                key={year}
+                                className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-xs font-semibold text-slate-800"
+                              >
+                                {year} Batch
+                              </span>
+                            )
+                          )
+                        ) : (
+                          <span className="text-sm text-slate-500">
+                            All batches eligible
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
                       <p className="text-xs font-medium text-slate-500">
                         Allowed Branches
                       </p>
 
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        {requirements.hardEligibility
-                          .branches &&
-                        requirements.hardEligibility
-                          .branches.length > 0 ? (
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {requirements.hardEligibility.branches &&
+                        requirements.hardEligibility.branches
+                          .length > 0 ? (
                           requirements.hardEligibility.branches.map(
                             (branch) => (
                               <span
                                 key={branch}
-                                className="rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-600"
+                                className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-xs font-medium text-slate-600"
                               >
                                 {branch}
                               </span>
@@ -427,10 +448,102 @@ function JobDetailsContent() {
                           )
                         ) : (
                           <span className="text-sm text-slate-500">
-                            All branches
+                            All branches eligible
                           </span>
                         )}
                       </div>
+                    </div>
+                  </div>
+                </section>
+              )}
+
+              {requirements && (
+                <section className="border-t border-slate-100 pt-6">
+                  <h2 className="mb-4 text-lg font-bold text-slate-900">
+                    Competencies & Requirements
+                  </h2>
+
+                  <div className="space-y-4">
+                    <div>
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                        Technical Skills
+                      </p>
+
+                      {requirements.competencies?.technicalSkills &&
+                      requirements.competencies.technicalSkills.length >
+                        0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {requirements.competencies.technicalSkills.map(
+                            (skill) => (
+                              <span
+                                key={skill}
+                                className="rounded-md border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700"
+                              >
+                                {skill}
+                              </span>
+                            )
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-xs italic text-slate-400">
+                          None specified
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                        Domain Knowledge
+                      </p>
+
+                      {requirements.competencies?.domainSkills &&
+                      requirements.competencies.domainSkills.length >
+                        0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {requirements.competencies.domainSkills.map(
+                            (domain) => (
+                              <span
+                                key={domain}
+                                className="rounded-md border border-purple-200 bg-purple-50 px-2.5 py-1 text-xs font-medium text-purple-700"
+                              >
+                                {domain}
+                              </span>
+                            )
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-xs italic text-slate-400">
+                          None specified
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                        Preferred Qualifications
+                      </p>
+
+                      {requirements.competencies
+                        ?.preferredQualifications &&
+                      requirements.competencies.preferredQualifications
+                        .length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {requirements.competencies.preferredQualifications.map(
+                            (qual) => (
+                              <span
+                                key={qual}
+                                className="rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700"
+                              >
+                                {qual}
+                              </span>
+                            )
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-xs italic text-slate-400">
+                          None specified
+                        </p>
+                      )}
                     </div>
                   </div>
                 </section>
