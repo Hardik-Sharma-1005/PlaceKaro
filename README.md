@@ -1,5 +1,4 @@
 <img width="7095" height="4510" alt="diagram" src="https://github.com/user-attachments/assets/72554b78-f91a-44c4-9186-004b5d35bbca" />
-# PlaceKaro
 
 ### Placement Intelligence Platform
 
